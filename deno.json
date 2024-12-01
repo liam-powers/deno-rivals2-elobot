@@ -1,0 +1,3 @@
+{
+  "workspace": ["./bot", "./functions", "./shared"]
+}
