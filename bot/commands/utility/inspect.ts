@@ -69,12 +69,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     buffer = await executeWithTimeout(
       generateInspectCard(
-        {
-          user,
-          guildid: interaction.guild!.id,
-          descriptionColor,
-          backgroundColor,
-        },
+        user,
+        interaction.guild!.id,
+        descriptionColor,
+        backgroundColor,
       ),
       20000,
     );

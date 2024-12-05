@@ -20,7 +20,8 @@ restricts this!), and more.
 ### Getting up and running
 
 - For the bot, run the start task in the root dir (`deno task start`)
-- For re-registering commands (i.e. adding a new one, modifying parameters), the `deploy` task is defined.
+- For re-registering commands (i.e. adding a new one, modifying parameters), the
+  `deploy` task is defined.
 
 ### Why Deno?
 

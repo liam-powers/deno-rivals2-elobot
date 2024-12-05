@@ -1,21 +1,15 @@
-import type { interfaces } from "@scope/shared";
+import { dynamoInteract, getNameColor, type interfaces } from "@scope/shared";
 import { ofetch } from "ofetch";
-import { dynamoInteract } from "@scope/shared";
 import sharp from "sharp";
 import { Buffer } from "node:buffer";
 import "jsr:@std/dotenv/load";
-import { getNameColor } from "@scope/shared";
 
-interface reqBody {
-  user: interfaces.User;
-  guildid: string;
-  descriptionColor: string;
-  backgroundColor: string;
-}
-
-export default async function generateInspectCard(req: reqBody) {
-  const { user, guildid, descriptionColor, backgroundColor } = req;
-
+export default async function generateInspectCard(
+  user: interfaces.User,
+  guildid: string,
+  descriptionColor: string,
+  backgroundColor: string,
+): Promise<Buffer> {
   const STEAM_API_KEY = Deno.env.get("STEAM_API_KEY");
   if (!STEAM_API_KEY) {
     throw new Error("Failed to get STEAM_API_KEY inside generateInspectCard!");
@@ -95,8 +89,5 @@ export default async function generateInspectCard(req: reqBody) {
     .png()
     .toBuffer();
 
-  // return new Response(buffer, {
-  //   status: 200,
-  // });
   return buffer;
 }
