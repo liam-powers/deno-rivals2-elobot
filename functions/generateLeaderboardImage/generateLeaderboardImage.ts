@@ -1,6 +1,6 @@
 import { ofetch } from "ofetch";
 import type { Guild } from "discord.js";
-import { type interfaces, getNameColor } from "@scope/shared";
+import { getNameColor, type interfaces } from "@scope/shared";
 import sharp from "sharp";
 import { Buffer } from "node:buffer";
 
@@ -58,7 +58,6 @@ export default async function generateLeaderboardImage(
     const entryBuffers = await Promise.all(
       rankedEntries.slice(begin, end).map(async (entry, index) => {
         maxCanvasHeight = Math.max(maxCanvasHeight, nEntries * entryHeight);
-
 
         const nameColor = getNameColor(entry.elo);
         const avatarBuffer = new Uint8Array(

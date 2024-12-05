@@ -19,7 +19,8 @@ restricts this!), and more.
 
 ### Getting up and running
 
-- For the bot, cd into `/bot` and run `deno run -A --env-file=../.env --watch main.ts`.
+- For the bot, run the start task in the root dir (`deno task start`)
+- For re-registering commands (i.e. adding a new one, modifying parameters), the `deploy` task is defined.
 
 ### Why Deno?
 
