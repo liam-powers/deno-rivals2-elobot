@@ -20,7 +20,7 @@ export const data = new SlashCommandBuilder()
       .setDescription("The link to the user's Steam profile")
       .setRequired(true)
   )
-  .setDefaultMemberPermissions(PermissionFlagsBits);
+  .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   try {
@@ -46,7 +46,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       ephemeral: true,
     });
 
-    await dynamoInteract.addUser(discordid, steamid64, guildid, nickname);
+    await dynamoInteract.addUser(discordid, steamid64, guildid!, nickname);
 
     // TODO: Update player data via link from lambdaUrls.json!
     updatePlayerData(interaction.client);

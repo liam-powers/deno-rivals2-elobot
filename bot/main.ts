@@ -6,6 +6,7 @@ import "jsr:@std/dotenv/load";
 
 const token = Deno.env.get("DISCORD_TOKEN");
 if (!token) {
+  console.log({ token });
   throw new Error("main.ts for bot: Couldn't find DISCORD_TOKEN!");
 }
 

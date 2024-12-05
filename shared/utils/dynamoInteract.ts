@@ -131,15 +131,6 @@ export async function getUser(
     Limit: 1,
   };
 
-  // const timestampParams = {
-  //     TableName: "rivals2-elobot-userstats",
-  //     KeyConditionExpression: "steamid64 = :steamid",
-  //     ExpressionAttributeValues: {
-  //         ":steamid": { S: "76561198069969259" }
-  //     },
-  //     ScanIndexForward: false, // descending order of timestamps
-  //     Limit: 1,
-  // };
   try {
     const command = new QueryCommand(params);
     const data = await db.send(command);

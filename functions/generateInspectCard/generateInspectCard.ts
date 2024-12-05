@@ -2,16 +2,20 @@ import type { interfaces } from "@scope/shared";
 import { ofetch } from "ofetch";
 import { dynamoInteract } from "@scope/shared";
 import sharp from "sharp";
-import { Buffer } from "buffer";
+import { Buffer } from "node:buffer";
 import "jsr:@std/dotenv/load";
+import { getNameColor } from "@scope/shared";
 
-export default async function generateInspectCard(
-  user: interfaces.User,
-  guildid: string,
-  nameColor: string,
-  descriptionColor: string,
-  backgroundColor: string,
-): Promise<Buffer> {
+interface reqBody {
+  user: interfaces.User;
+  guildid: string;
+  descriptionColor: string;
+  backgroundColor: string;
+}
+
+export default async function generateInspectCard(req: reqBody) {
+  const { user, guildid, descriptionColor, backgroundColor } = req;
+
   const STEAM_API_KEY = Deno.env.get("STEAM_API_KEY");
   if (!STEAM_API_KEY) {
     throw new Error("Failed to get STEAM_API_KEY inside generateInspectCard!");
@@ -38,6 +42,8 @@ export default async function generateInspectCard(
     .png()
     .toBuffer();
 
+  const nameColor = getNameColor(latestUserStats.elo);
+
   const textSummaryBuffer = await sharp({
     create: {
       width: avatarSize * 2,
@@ -50,22 +56,22 @@ export default async function generateInspectCard(
       {
         input: Buffer.from(
           `<svg width="${avatarSize * 2}" height="${avatarSize}">
-                            <text x="10" y="40" font-size="30" font-family="Liberation Sans" fill="${nameColor}">
-                                ${user.guildid_to_nickname[guildid]}
-                            </text>
-                            <text x="10" y="80" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}">
-                                ELO: ${latestUserStats.elo}
-                            </text>
-                            <text x="10" y="110" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}">
-                                Rank: #${latestUserStats.rank}
-                            </text>
-                            <text x="10" y="140" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}">
-                                Winstreak: ${latestUserStats.winstreak}
-                            </text>
-                            <text x="10" y="170" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}">
-                                Generated ${readableTime}
-                            </text>
-                        </svg>`,
+                              <text x="10" y="40" font-size="30" font-family="Coolvetica" fill="${nameColor}">
+                                  ${user.guildid_to_nickname[guildid]}
+                              </text>
+                              <text x="10" y="80" font-size="20" font-family="Coolvetica" fill="${descriptionColor}">
+                                  ELO: ${latestUserStats.elo}
+                              </text>
+                              <text x="10" y="110" font-size="20" font-family="Coolvetica" fill="${descriptionColor}">
+                                  Rank: #${latestUserStats.rank}
+                              </text>
+                              <text x="10" y="140" font-size="20" font-family="Coolvetica" fill="${descriptionColor}">
+                                  Winstreak: ${latestUserStats.winstreak}
+                              </text>
+                              <text x="10" y="170" font-size="20" font-family="Coolvetica" fill="${descriptionColor}">
+                                  Generated ${readableTime}
+                              </text>
+                          </svg>`,
         ),
         top: 0,
         left: 0,
@@ -89,5 +95,8 @@ export default async function generateInspectCard(
     .png()
     .toBuffer();
 
+  // return new Response(buffer, {
+  //   status: 200,
+  // });
   return buffer;
 }

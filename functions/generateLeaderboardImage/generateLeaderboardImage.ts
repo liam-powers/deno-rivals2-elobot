@@ -1,16 +1,16 @@
 import { ofetch } from "ofetch";
 import type { Guild } from "discord.js";
-import type { interfaces } from "@scope/shared";
+import { type interfaces, getNameColor } from "@scope/shared";
 import sharp from "sharp";
-import { Buffer } from "buffer";
+import { Buffer } from "node:buffer";
 
 export default async function generateLeaderboardImage(
   usersLeaderboardInfo: interfaces.UserLeaderboardInfo[],
   guild: Guild,
-  entriesPerColumn = 5,
-  nameColor = "black",
-  descriptionColor = "black",
-  backgroundColor = "white",
+  entriesPerColumn = 10,
+  descriptionColor = "white",
+  backgroundColor = "black",
+  lowDetailMode = true,
 ): Promise<Buffer[]> {
   const buffers: Buffer[] = [];
   if (usersLeaderboardInfo.length === 0) {
@@ -29,9 +29,9 @@ export default async function generateLeaderboardImage(
 
   const nColumns = Math.ceil(rankedEntries.length / entriesPerColumn);
   const entryHeight = 200;
-  const canvasWidth = 800;
+  const canvasWidth = 1000;
   const avatarSize = 180;
-  const textAreaWidth = 400;
+  const textAreaWidth = 800;
   let maxCanvasHeight = 0;
 
   for (let i = 0; i < nColumns; i++) {
@@ -58,7 +58,10 @@ export default async function generateLeaderboardImage(
     const entryBuffers = await Promise.all(
       rankedEntries.slice(begin, end).map(async (entry, index) => {
         maxCanvasHeight = Math.max(maxCanvasHeight, nEntries * entryHeight);
-        const avatarBuffer = Buffer.from(
+
+
+        const nameColor = getNameColor(entry.elo);
+        const avatarBuffer = new Uint8Array(
           await ofetch(entry.imageURL, { responseType: "arrayBuffer" }),
         );
 
@@ -77,25 +80,38 @@ export default async function generateLeaderboardImage(
         })
           .composite([
             {
-              input: Buffer.from(
-                `<svg width="${textAreaWidth}" height="${entryHeight}">
-                                <text x="10" y="40" font-size="30" font-family="Liberation Sans" fill="${nameColor}">
+              input: lowDetailMode
+                ? Buffer.from(
+                  `<svg width="${textAreaWidth}" height="${entryHeight}">
+                  <text x="0" y="80" font-size="80" font-family="Coolvetica" fill="${nameColor}">
+                      #${entry.serverRank}: ${entry.nickname}
+                  </text>
+                  <text x="0" y="160" font-size="60" font-family="Coolvetica" fill="${nameColor}">
+                      ${entry.elo}
+                  </text>
+              </svg>`,
+                  "utf-8",
+                )
+                : Buffer.from(
+                  `<svg width="${textAreaWidth}" height="${entryHeight}">
+                                <text x="10" y="40" font-size="30" font-family="Coolvetica" fill="${nameColor}">
                                     ${entry.nickname}
                                 </text>
-                                <text x="10" y="90" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}">
+                                <text x="10" y="90" font-size="20" font-family="Coolvetica" fill="${descriptionColor}">
                                     ELO: ${entry.elo}
                                 </text>
-                                <text x="10" y="120" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}">
+                                <text x="10" y="120" font-size="20" font-family="Coolvetica" fill="${descriptionColor}">
                                     Global Rank: #${entry.globalRank}
                                 </text>
-                                <text x="10" y="150" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}">
+                                <text x="10" y="150" font-size="20" font-family="Coolvetica" fill="${descriptionColor}">
                                     Server Rank: #${entry.serverRank}
                                 </text>
-                                <text x="10" y="180" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}">
+                                <text x="10" y="180" font-size="20" font-family="Coolvetica" fill="${descriptionColor}">
                                     Winstreak: ${entry.winstreak}
                                 </text>
                             </svg>`,
-              ),
+                  "utf-8",
+                ),
               top: 0,
               left: 0,
             },
@@ -135,57 +151,70 @@ export default async function generateLeaderboardImage(
       ) / nEntries,
     );
 
-    const infoBuffer = await sharp({
-      create: {
-        width: canvasWidth,
-        height: entryHeight,
-        channels: 4,
-        background: { r: 255, g: 255, b: 255, alpha: 0 },
-      },
-    })
-      .composite([
-        {
-          input: Buffer.from(
-            `<svg width="${canvasWidth}" height="${entryHeight}">
+    let infoBuffer;
+    let finalImageBuffer;
+    if (!lowDetailMode) {
+      infoBuffer = await sharp({
+        create: {
+          width: canvasWidth,
+          height: entryHeight,
+          channels: 4,
+          background: { r: 255, g: 255, b: 255, alpha: 0 },
+        },
+      })
+        .composite([
+          {
+            input: Buffer.from(
+              `<svg width="${canvasWidth}" height="${entryHeight}">
                             <text x="${
-              canvasWidth - 10
-            }" y="40" font-size="20" font-family="Liberation Sans" font-weight="bold" fill="${descriptionColor}" text-anchor="end">
+                canvasWidth - 10
+              }" y="40" font-size="20" font-family="Coolvetica" font-weight="bold" fill="${descriptionColor}" text-anchor="end">
                                 Column ${i + 1}
                             </text>
                             <text x="${
-              canvasWidth - 10
-            }" y="70" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}" text-anchor="end">
+                canvasWidth - 10
+              }" y="70" font-size="20" font-family="Coolvetica" fill="${descriptionColor}" text-anchor="end">
                                 Average ELO: ${avgElo.toFixed(0)}
                             </text>
                             <text x="${
-              canvasWidth - 10
-            }" y="100" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}" text-anchor="end">
+                canvasWidth - 10
+              }" y="100" font-size="20" font-family="Coolvetica" fill="${descriptionColor}" text-anchor="end">
                                 Average Rank: ${avgGlobalRank.toFixed(0)}
                             </text>
                         </svg>`,
-          ),
-          top: 0,
-          left: 0,
-        },
-      ])
-      .png()
-      .toBuffer();
+              "utf-8",
+            ),
+            top: 0,
+            left: 0,
+          },
+        ])
+        .png()
+        .toBuffer();
 
-    const finalImageBuffer = await sharp(backgroundBuffer)
-      .composite(
-        entryBuffers.map(({ buffer, top }) => ({
-          input: buffer,
-          top: top,
-          left: 0,
-        })).concat({
-          input: infoBuffer,
-          top: 0,
-          left: 0,
-        }),
-      )
-      .png()
-      .toBuffer();
-
+      finalImageBuffer = await sharp(backgroundBuffer)
+        .composite(
+          entryBuffers.map(({ buffer, top }) => ({
+            input: buffer,
+            top: top,
+            left: 0,
+          })).concat({
+            input: infoBuffer,
+            top: 0,
+            left: 0,
+          }),
+        )
+        .png()
+        .toBuffer();
+    } else {
+      finalImageBuffer = await sharp(backgroundBuffer)
+        .composite(
+          entryBuffers.map(({ buffer, top }) => ({
+            input: buffer,
+            top: top,
+            left: 0,
+          })),
+        ).png().toBuffer();
+    }
     buffers.push(finalImageBuffer);
   }
 
@@ -198,97 +227,106 @@ export default async function generateLeaderboardImage(
   const guildIconScalar = Math.floor(
     Math.min(maxCanvasHeight, canvasWidth) * 0.6,
   );
-  const resizedGuildIconBuffer = await sharp(Buffer.from(guildIconBuffer))
+  const resizedGuildIconBuffer = await sharp(new Uint8Array(guildIconBuffer))
     .resize(guildIconScalar)
     .png()
     .toBuffer();
   const resizedGuildIconMetadata = await sharp(resizedGuildIconBuffer)
     .metadata();
 
-  const textSummaryBuffer = await sharp({
-    create: {
-      width: canvasWidth,
-      height: maxCanvasHeight,
-      channels: 4,
-      background: { r: 255, g: 255, b: 255, alpha: 0 },
-    },
-  })
-    .composite([
-      {
-        input: Buffer.from(
-          `<svg width="${canvasWidth}" height="${entryHeight}">
+  let textSummaryBuffer;
+
+  if (!lowDetailMode) {
+    textSummaryBuffer = await sharp({
+      create: {
+        width: canvasWidth,
+        height: maxCanvasHeight,
+        channels: 4,
+        background: { r: 255, g: 255, b: 255, alpha: 0 },
+      },
+    })
+      .composite([
+        {
+          input: Buffer.from(
+            `<svg width="${canvasWidth}" height="${entryHeight}">
                         <text x="${
-            canvasWidth / 2
-          }" y="40" font-size="30" font-family="Liberation Sans" font-weight="bold" fill="${descriptionColor}" text-anchor="middle">
+              canvasWidth / 2
+            }" y="40" font-size="30" font-family="Coolvetica" font-weight="bold" fill="${descriptionColor}" text-anchor="middle">
                             ${guild.name}
                         </text>
                         <text x="${
-            canvasWidth / 2
-          }" y="80" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}" text-anchor="middle">
+              canvasWidth / 2
+            }" y="80" font-size="20" font-family="Coolvetica" fill="${descriptionColor}" text-anchor="middle">
                             Average ELO: ${
-            Math.round(
-              rankedEntries.reduce((sum, entry) => sum + entry.elo, 0) /
-                rankedEntries.length,
-            )
-          }
+              Math.round(
+                rankedEntries.reduce((sum, entry) => sum + entry.elo, 0) /
+                  rankedEntries.length,
+              )
+            }
                         </text>
                         <text x="${
-            canvasWidth / 2
-          }" y="110" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}" text-anchor="middle">
+              canvasWidth / 2
+            }" y="110" font-size="20" font-family="Coolvetica" fill="${descriptionColor}" text-anchor="middle">
                             Average Global Rank: ${
-            Math.round(
-              rankedEntries.reduce((sum, entry) => sum + entry.globalRank, 0) /
-                rankedEntries.length,
-            )
-          }
+              Math.round(
+                rankedEntries.reduce(
+                  (sum, entry) => sum + entry.globalRank,
+                  0,
+                ) /
+                  rankedEntries.length,
+              )
+            }
                         </text>
                         <text x="${
-            canvasWidth / 2
-          }" y="140" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}" text-anchor="middle">
+              canvasWidth / 2
+            }" y="140" font-size="20" font-family="Coolvetica" fill="${descriptionColor}" text-anchor="middle">
                             Tracking ${rankedEntries.length} users
                         </text>
                         <text x="${
-            canvasWidth / 2
-          }" y="170" font-size="20" font-family="Liberation Sans" fill="${descriptionColor}" text-anchor="middle">
+              canvasWidth / 2
+            }" y="170" font-size="20" font-family="Coolvetica" fill="${descriptionColor}" text-anchor="middle">
                             Generated ${readableTime}
                         </text>
                     </svg>`,
-        ),
-        top: 0,
-        left: 0,
-      },
-    ])
-    .png()
-    .toBuffer();
+            "utf-8",
+          ),
+          top: 0,
+          left: 0,
+        },
+      ])
+      .png()
+      .toBuffer();
+  }
 
-  const summaryBuffer = await sharp({
-    create: {
-      width: canvasWidth,
-      height: maxCanvasHeight,
-      channels: 4,
-      background: backgroundColor,
-    },
-  })
-    .composite([
-      {
-        input: resizedGuildIconBuffer,
-        top: 20,
-        left: Math.floor(
-          (canvasWidth - (resizedGuildIconMetadata.width || 0)) / 2,
-        ),
+  if (!lowDetailMode) {
+    const summaryBuffer = await sharp({
+      create: {
+        width: canvasWidth,
+        height: maxCanvasHeight,
+        channels: 4,
+        background: backgroundColor,
       },
-      {
-        input: textSummaryBuffer,
-        top: (resizedGuildIconMetadata.height || 0) + 40,
-        left: 0,
-      },
-    ])
-    .png()
-    .toBuffer();
+    })
+      .composite([
+        {
+          input: resizedGuildIconBuffer,
+          top: 20,
+          left: Math.floor(
+            (canvasWidth - (resizedGuildIconMetadata.width || 0)) / 2,
+          ),
+        },
+        {
+          input: textSummaryBuffer,
+          top: (resizedGuildIconMetadata.height || 0) + 40,
+          left: 0,
+        },
+      ])
+      .png()
+      .toBuffer();
 
-  buffers.unshift(summaryBuffer);
+    buffers.unshift(summaryBuffer);
+  }
 
-  console.log("generateLeaderboardImage returning buffers!");
   const totalWidth = buffers.length * canvasWidth;
   const finalBuffer = await sharp({
     create: {

@@ -20,7 +20,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     await dynamoInteract.updateNickname(discordid, guildid, nickname!);
     await interaction.reply({
-      content: `Updated your nickname to ${nickname}!`,
+      content:
+        `Updated your nickname to ${nickname}! It should populate in the next 5 minutes.`,
       ephemeral: true,
     });
   } catch (_error) {

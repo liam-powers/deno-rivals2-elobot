@@ -1,3 +1,7 @@
 {
-  "workspace": ["./bot", "./functions", "./shared"]
+  "workspace": ["./bot", "./functions", "./shared"],
+  "tasks": {
+    "start": "deno run -A --env-file=./.env --watch ./bot/main.ts",
+    "deploy": "deno run -A --env-file=./.env ./bot/deploy-commands.ts"
+  }
 }

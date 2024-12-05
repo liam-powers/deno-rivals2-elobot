@@ -1,6 +1,10 @@
 import { AttachmentBuilder, ChatInputCommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { cleanHexCode, dynamoInteract } from "@scope/shared";
+import {
+  cleanHexCode,
+  dynamoInteract,
+  executeWithTimeout,
+} from "@scope/shared";
 import { generateInspectCard } from "@scope/functions";
 
 export const data = new SlashCommandBuilder()
@@ -11,12 +15,6 @@ export const data = new SlashCommandBuilder()
       .setName("target")
       .setDescription("The Discord member you'd like to inquire about.")
       .setRequired(true)
-  )
-  .addStringOption((option) =>
-    option
-      .setName("name_color")
-      .setDescription("Hex code for the player nicknames.")
-      .setRequired(false)
   )
   .addStringOption((option) =>
     option
@@ -32,8 +30,8 @@ export const data = new SlashCommandBuilder()
   );
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  const startTime = Date.now();
   const target = interaction.options.getUser("target");
-  const uncleanNameColor = interaction.options.getString("name_color");
   const uncleanDescriptionColor = interaction.options.getString(
     "description_color",
   );
@@ -43,11 +41,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   await interaction.reply("Give me a second to generate the summary image...");
 
-  let nameColor, descriptionColor, backgroundColor;
+  let descriptionColor, backgroundColor;
   try {
-    nameColor = cleanHexCode(uncleanNameColor) || "black";
-    descriptionColor = cleanHexCode(uncleanDescriptionColor) || "black";
-    backgroundColor = cleanHexCode(uncleanBackgroundColor) || "white";
+    descriptionColor = cleanHexCode(uncleanDescriptionColor) || "white";
+    backgroundColor = cleanHexCode(uncleanBackgroundColor) || "black";
   } catch (_error) {
     await interaction.editReply(
       "Something went wrong parsing your colors! Make sure your hex codes are in the format FFFFFF or #FFFFFF.",
@@ -57,23 +54,48 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const user = await dynamoInteract.getUser(target!.id);
   if (!user) {
-    await interaction.reply({
-      content: "Couldn't find target in database!",
-      ephemeral: true,
-    });
+    await interaction.editReply(`Couldn't find target ${target} in database!`);
     return;
   }
 
-  const buffer = await generateInspectCard(
-    user,
-    interaction.guild!.id,
-    nameColor,
-    descriptionColor,
-    backgroundColor,
-  );
+  if (!(interaction.guildId in user.guildid_to_nickname)) {
+    await interaction.editReply(
+      `Couldn't find target ${target} in database for this server! This is strange. Try asking them to link their Steam in this specific server again?`,
+    );
+    return;
+  }
+
+  let buffer;
+  try {
+    buffer = await executeWithTimeout(
+      generateInspectCard(
+        {
+          user,
+          guildid: interaction.guild!.id,
+          descriptionColor,
+          backgroundColor,
+        },
+      ),
+      20000,
+    );
+  } catch (_error) {
+    await interaction.editReply(
+      "Generating the inspect player card took more than 20 seconds and the function timed out! Contact @liamhi on Discord for support.",
+    );
+    return;
+  }
 
   const attachment = new AttachmentBuilder(buffer, {
     name: `${target!.id}_summary.png`,
   });
-  await interaction.editReply({ files: [attachment] });
+
+  const readableTime = new Date().toLocaleString();
+  const elapsedSeconds = (Date.now() - startTime) / 1000;
+  await interaction.editReply({
+    content:
+      `Here's the server leaderboard as of ${readableTime}, delivered to you in ${
+        elapsedSeconds.toFixed(2)
+      } seconds.`,
+    files: [attachment],
+  });
 }

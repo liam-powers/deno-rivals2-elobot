@@ -1,11 +1,14 @@
 import { AttachmentBuilder, ChatInputCommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { cleanHexCode, dynamoInteract, type interfaces } from "@scope/shared";
+import {
+  cleanHexCode,
+  dynamoInteract,
+  executeWithTimeout,
+  type interfaces,
+} from "@scope/shared";
 import { ofetch } from "ofetch";
 import { Buffer } from "node:buffer";
 import { generateLeaderboardImage } from "@scope/functions";
-
-const STEAM_API_KEY = Deno.env.get("STEAM_API_KEY");
 
 // 30 second cooldown, fairly expensive to generate leaderboard image
 export const cooldown = 30;
@@ -14,12 +17,6 @@ export const data = new SlashCommandBuilder()
   .setName("leaderboard")
   .setDescription(
     "Get a leaderboard and summary of all of the players in the server! Displays up to 100 players.",
-  )
-  .addStringOption((option) =>
-    option
-      .setName("name_color")
-      .setDescription("Hex code for the player nicknames.")
-      .setRequired(false)
   )
   .addStringOption((option) =>
     option
@@ -33,22 +30,39 @@ export const data = new SlashCommandBuilder()
       .setDescription("Hex code for the background color.")
       .setRequired(false)
   )
+  .addBooleanOption((option) =>
+    option
+      .setName("high_detail_mode")
+      .setDescription("Display additional info on leaderboard?")
+      .setRequired(false)
+  )
   .addIntegerOption((option) =>
     option
       .setName("entries_per_column")
       .setDescription(
-        "The number of entries each column should have at most (defaults to 5).",
+        "The number of entries each column should have at most.",
       )
       .setRequired(false)
   );
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  const startTime = Date.now();
   const guildid = interaction.guildId;
+
+  const STEAM_API_KEY = Deno.env.get("STEAM_API_KEY");
+  if (!STEAM_API_KEY) {
+    await interaction.reply({
+      content: "Something went wrong with the bot config!",
+      ephemeral: true,
+    });
+    throw new Error("Couldn't get STEAM_API_KEY from .env in leaderboard.ts!");
+  }
 
   await interaction.reply({
     content: "Generating your leaderboard! Give me a few seconds...",
     ephemeral: false,
   });
+
   const latestUserStats = await dynamoInteract.getLatestUsersStats();
   if (!latestUserStats) {
     console.error("leaderboard command: couldn't find latestUserStats!");
@@ -61,7 +75,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // const steamid64ToUser: Record<string, User> = {};
   const steamidsInGuild = new Set<string>();
   users.forEach((user) => {
-    if (guildid in user.guildid_to_nickname) {
+    if (guildid! in user.guildid_to_nickname) {
       steamidsInGuild.add(user.steamid64);
     }
   });
@@ -106,7 +120,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
     usersLeaderboardInfo.push({
       imageURL: steamid64ToAvatarURL[steamid],
-      nickname: steamid64ToGuildUser[steamid].guildid_to_nickname[guildid],
+      nickname: steamid64ToGuildUser[steamid].guildid_to_nickname[guildid!],
       elo: steamid64ToGuildUserStat[steamid].elo,
       globalRank: steamid64ToGuildUserStat[steamid].rank,
       winstreak: steamid64ToGuildUserStat[steamid].winstreak,
@@ -114,7 +128,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   // 3. creating the leaderboard
-  const uncleanNameColor = interaction.options.getString("name_color");
   const uncleanDescriptionColor = interaction.options.getString(
     "description_color",
   );
@@ -122,9 +135,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     "background_color",
   );
 
-  let nameColor, descriptionColor, backgroundColor;
+  let descriptionColor, backgroundColor;
   try {
-    nameColor = cleanHexCode(uncleanNameColor);
     descriptionColor = cleanHexCode(uncleanDescriptionColor);
     backgroundColor = cleanHexCode(uncleanBackgroundColor);
   } catch (_error) {
@@ -134,20 +146,34 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const entriesPerPage = interaction.options.getInteger("entries_per_column") ||
-    5;
+  const entriesPerColumn =
+    interaction.options.getInteger("entries_per_column") ||
+    undefined;
+
+  const lowDetailMode = !interaction.options.getBoolean("high_detail_mode");
 
   // TODO: Make a call to the generateLeaderboardImage Lambda URL from lambdaUrls.json with these parameters
-  const buffers: Buffer[] = await generateLeaderboardImage(
-    usersLeaderboardInfo,
-    interaction.guild!,
-    entriesPerPage,
-    nameColor,
-    descriptionColor,
-    backgroundColor,
-  );
+  let buffers: Buffer[];
+  try {
+    buffers = await executeWithTimeout(
+      generateLeaderboardImage(
+        usersLeaderboardInfo,
+        interaction.guild!,
+        entriesPerColumn,
+        descriptionColor,
+        backgroundColor,
+        lowDetailMode,
+      ),
+      20000,
+    );
+  } catch (_error) {
+    await interaction.editReply(
+      "The leaderboard function took more than 20 seconds and timed out! Contact @liamhi on Discord for support.",
+    );
+    return;
+  }
 
-  // 4. sending the bufferes as an array of attachments with discord.js's AttachmentBuilder
+  // 4. sending the buffers as an array of attachments with discord.js's AttachmentBuilder
   let i = 0;
   const attachments = buffers.map((buffer: Buffer) => {
     i++;
@@ -155,9 +181,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   const readableTime = new Date().toLocaleString();
+  const elapsedSeconds = (Date.now() - startTime) / 1000;
 
   await interaction.editReply({
-    content: `Here's the server leaderboard as of ${readableTime}.`,
+    content:
+      `Here's the server leaderboard as of ${readableTime}, delivered to you in ${
+        elapsedSeconds.toFixed(2)
+      } seconds.`,
     files: attachments,
   });
 }

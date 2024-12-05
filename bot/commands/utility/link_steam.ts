@@ -26,7 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         "Your request to link your Steam has been received! Your info will be updated shortly.",
       ephemeral: true,
     });
-    dynamoInteract.addUser(discordid, steamid64, guildid, nickname);
+    dynamoInteract.addUser(discordid, steamid64, guildid!, nickname);
     // TODO: Update player data via link from lambdaUrls.json!
     updatePlayerData(interaction.client);
   } catch (error) {
