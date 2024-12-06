@@ -1,2 +1,3 @@
 **/.env
 lambdaUrls.json
+.DS_Store

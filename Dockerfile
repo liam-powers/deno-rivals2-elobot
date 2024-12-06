@@ -7,7 +7,7 @@ RUN mkdir -p /usr/share/fonts/truetype/coolvetica \
     && mkdir -p /home/deno/.cache/fontconfig \
     && chown -R deno:deno /home/deno/.cache/fontconfig
 
-COPY ./fonts/coolvetica /usr/share/fonts/truetype/coolvetica/
+COPY ./fonts/coolvetica/*.otf /usr/share/fonts/truetype/coolvetica/
 
 RUN apt-get update && apt-get install -y \
     fontconfig

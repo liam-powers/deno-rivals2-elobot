@@ -58,3 +58,7 @@ client.login(token);
 console.log("Client logged in!");
 
 updatePlayerData(client);
+
+Deno.cron("updatePlayerData cron job", "*/5 * * * *", () => {
+  updatePlayerData(client);
+});

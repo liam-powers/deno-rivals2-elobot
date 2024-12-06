@@ -72,7 +72,6 @@ export default async function updatePlayerData(client: Client<boolean>) {
 
   // if there are not latest user stats, we'll default winstreaks to 0
   if (!prevUserStats || prevUserStats.length === 0) {
-    // console.log("no previous user stats found, defaulting winstreaks...");
     newUserStats = newUserStats.map((userStats) => ({
       ...userStats,
       winstreak: "0",
