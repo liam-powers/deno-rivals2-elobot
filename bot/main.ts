@@ -3,6 +3,7 @@ import path from "node:path";
 import fs from "node:fs";
 import * as denoPath from "jsr:@std/path";
 import "jsr:@std/dotenv/load";
+import { updatePlayerData } from "@scope/functions";
 
 const token = Deno.env.get("DISCORD_TOKEN");
 if (!token) {
@@ -55,3 +56,5 @@ for (const file of eventFiles) {
 
 client.login(token);
 console.log("Client logged in!");
+
+updatePlayerData(client);

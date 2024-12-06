@@ -69,27 +69,45 @@ export async function addUserStatsEntries(
       );
       return;
     }
-    const userStatsInsert = userStatsData
-      .map((userStats) => ({
-        PutRequest: {
-          Item: {
-            steamid64: { S: userStats.steamid64 },
-            elo: { N: userStats.elo.toString() },
-            rank: { N: userStats.rank.toString() },
-            timestamp: { N: userStats.timestamp.toString() },
-            winstreak: { S: userStats.winstreak || "0" },
+
+    // BatchWriteItemCommand limited to size of 25, split into chunks
+    // Split the data into chunks of 25
+    const chunkSize = 25;
+    const chunks = [];
+    for (let i = 0; i < userStatsData.length; i += chunkSize) {
+      chunks.push(userStatsData.slice(i, i + chunkSize));
+    }
+
+    for (const chunk of chunks) {
+      const userStatsInsert = chunk
+        .map((userStats) => ({
+          PutRequest: {
+            Item: {
+              steamid64: { S: userStats.steamid64 },
+              elo: { N: userStats.elo.toString() },
+              rank: { N: userStats.rank.toString() },
+              timestamp: { N: userStats.timestamp.toString() },
+              winstreak: { S: userStats.winstreak || "0" },
+            },
           },
+        }));
+
+      const params = {
+        RequestItems: {
+          "rivals2-elobot-userstats": userStatsInsert,
         },
-      }));
+      };
 
-    const params = {
-      RequestItems: {
-        "rivals2-elobot-userstats": userStatsInsert,
-      },
-    };
+      const command = new BatchWriteItemCommand(params);
+      const response = await db.send(command);
 
-    const command = new BatchWriteItemCommand(params);
-    const _data = await db.send(command);
+      if (
+        response.UnprocessedItems &&
+        Object.keys(response.UnprocessedItems).length > 0
+      ) {
+        console.warn("Unprocessed items found in addUserStatsEntries()...");
+      }
+    }
   } catch (error) {
     console.error("Error adding user stats:", error);
   }

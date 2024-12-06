@@ -34,12 +34,12 @@ export default async function updatePlayerData(client: Client<boolean>) {
     "https://steamcommunity.com/stats/2217000/leaderboards/14800950/?xml=1",
   );
   let $ = cheerio.load(leaderboard, { xmlMode: true });
-  let i = 0;
+  let i = 0; // limit parsing to 500 leaderboard pages, if it gets over that number something has gone very wrong (currently around 10-15 leaderboard pages)
   const timestamp = Date.now();
 
   while (
     ($("nextRequestURL")?.text()?.length > 0) &&
-    (users.length > newUserStats.length) && (i < 100)
+    (users.length > newUserStats.length) && (i < 500)
   ) {
     if (i > 0) {
       const nextLeaderboard = await ofetch($("nextRequestURL").text());
@@ -85,45 +85,39 @@ export default async function updatePlayerData(client: Client<boolean>) {
     newUserStats = newUserStats.map((newer) => {
       const prev = prevUserStatsMap.get(newer.steamid64);
 
-      // no previous user found
-      if (!prev) {
-        // console.log(`Couldn't find a previous entry for user with ELO ${newer.elo}`);
-        newer.winstreak = "0";
-        return newer;
-      }
+      const winstreakFormattedCorrectly = (winstreak: string): boolean => {
+        if (
+          (winstreak === "0") ||
+          ((winstreak.startsWith("+") || winstreak.startsWith("-")) &&
+            (parseInt(winstreak.slice(1))))
+        ) {
+          return true;
+        }
+        return false;
+      };
 
-      // if we have a previous user...
-      if (prev.elo === newer.elo) {
-        newer.winstreak = prev.winstreak;
-      } else if (prev.winstreak === "0") {
-        newer.winstreak = (prev.elo < newer.elo) ? "+1" : "-1";
-      } else if (prev.winstreak.startsWith("+")) {
-        const posWinstreakInt = parseInt(prev.winstreak.slice(1));
-        if (prev.elo < newer.elo) { // won
-          newer.winstreak = "+" + ((posWinstreakInt + 1).toString());
-        } else { // lost
-          newer.winstreak = (posWinstreakInt - 1 > 0)
-            ? ("+" + (posWinstreakInt - 1).toString())
-            : "0";
-        }
-      } else if (prev.winstreak.startsWith("-")) {
-        const negWinStreakInt = parseInt(prev.winstreak.slice(1));
-        if (prev.elo > newer.elo) { // lost
-          newer.winstreak = "-" + ((negWinStreakInt - 1).toString());
-        } else { // won
-          newer.winstreak = (negWinStreakInt + 1 < 0)
-            ? "-" + ((negWinStreakInt + 1).toString())
-            : "0";
-        }
-      } else {
-        console.error(
-          "Detected a foreign winstreak identifier:",
-          prev.winstreak,
-          "defaulting to 0.",
+      if (!prev) { // no previous user found
+        newer.winstreak = "0";
+      } else if (!winstreakFormattedCorrectly(prev.winstreak)) { // prev user + winstreak found, but winstreak is in an odd format
+        console.warn(
+          `Winstreak ${prev.winstreak} doesn't match format, defaulting to 0`,
         );
         newer.winstreak = "0";
+      } else if (prev.elo === newer.elo) { // no change in ELO, continue with same properly-formatted winstreak
+        newer.winstreak = prev.winstreak;
+      } else if (prev.winstreak === "0") { // change in ELO to a 0 winstreak
+        newer.winstreak = (prev.elo < newer.elo) ? "+1" : "-1";
+      } else if (prev.winstreak.startsWith("+")) { // change in ELO to a + winstreak
+        const posWinstreakInt = parseInt(prev.winstreak.slice(1));
+        newer.winstreak = (prev.elo < newer.elo)
+          ? "+" + ((posWinstreakInt + 1).toString())
+          : "-1";
+      } else if (prev.winstreak.startsWith("-")) { // change in ELO to a - winstreak
+        const negWinStreakInt = parseInt(prev.winstreak.slice(1));
+        newer.winstreak = (prev.elo > newer.elo)
+          ? "-" + ((negWinStreakInt - 1).toString())
+          : "+1";
       }
-
       return newer;
     });
   }
