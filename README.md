@@ -46,7 +46,6 @@ score and global rank, allowing for leaderboard and player card image generation
 
 1. If you don't already have Deno set up, you'll want to install it to your command line. Instructions for that are [here](https://docs.deno.com/runtime/).
 2. Add your newly-created Discord app to your servers by generating an OAuth2 link in the developer window. From the [Developer Portal](https://discord.com/developers/applications), scroll down to the OAuth2 URL generator and give it `applications.commands`, `bot`, `Send Messages`, and `Manage Nicknames` permissions. Then, open the URL you've generated and add it to both of the Discord servers (you may have to open the URL once for each server).
-3. Register the commands. Run `deno task deploy` in the root dir, and if all goes well, you should be able to type `/` in either of your servers and have a variety of commands pop up from the bot.
 
 - To run the server:
 
