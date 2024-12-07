@@ -58,7 +58,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  if (!(interaction.guildId in user.guildid_to_nickname)) {
+  if (!(interaction.guildId! in user.guildid_to_nickname)) {
     await interaction.editReply(
       `Couldn't find target ${target} in database for this server! This is strange. Try asking them to link their Steam in this specific server again?`,
     );
@@ -91,7 +91,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const elapsedSeconds = (Date.now() - startTime) / 1000;
   await interaction.editReply({
     content:
-      `Here's the server leaderboard as of ${readableTime}, delivered to you in ${
+      `Here's ${target}'s information as of ${readableTime}, delivered to you in ${
         elapsedSeconds.toFixed(2)
       } seconds.`,
     files: [attachment],

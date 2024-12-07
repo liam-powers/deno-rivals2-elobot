@@ -1,5 +1,6 @@
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v10";
+import { ofetch } from "npm:ofetch";
 import fs from "node:fs";
 import path from "node:path";
 import * as denoPath from "jsr:@std/path";
@@ -50,20 +51,28 @@ const rest = new REST().setToken(token);
       `Started refreshing ${commands.length} application (/) commands.`,
     );
 
-    // The put method is used to fully refresh all commands in the guild with the current set
-    let data = await rest.put(
-      Routes.applicationGuildCommands(clientid, testGuildid),
-      { body: commands },
-    );
-    // const data: any = await rest.put(
-    //     Routes.applicationCommands(clientid),
-    //     { body: commands },
-    // );
+    await rest.put(Routes.applicationCommands(clientid), { body: [] }); // Clear all global commands
+    let data;
+    try {
+      const DISCORD_CLIENT_ID = Deno.env.get("DISCORD_CLIENT_ID");
+      data = await ofetch(
+        `https://discord.com/api/v10/applications/${DISCORD_CLIENT_ID}/commands`,
+        {
+          // @ts-ignore doesn't like PUT for some reason, but this is defined in ofetch api
+          method: "PUT",
+          headers: {
+            Authorization: `Bot ${token}`,
+            "Content-Type": "application/json; charset=UTF-8",
+            "User-Agent": `DiscordBot (discord.js, 14.16.3 (modified))`,
+          },
+          body: JSON.stringify(commands),
+        },
+      );
+    } catch (err) {
+      console.error("error adding commands:", err);
+      return;
+    }
 
-    data = await rest.put(
-      Routes.applicationGuildCommands(clientid, vibeGuildid),
-      { body: commands },
-    );
     console.log(
       // @ts-ignore discord doesn't provie typing for this
       `Successfully reloaded ${data.length} application (/) commands.`,
