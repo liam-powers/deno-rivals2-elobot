@@ -9,12 +9,15 @@ score and global rank, allowing for leaderboard and player card image generation
 ## Examples
 
 **Configurable leaderboard generation via `/leaderboard`**:
+<br/>
 <img src="https://i.imgur.com/gAbF6EF.png" width="600" />
 
 **Individualized player cards via `/inspect`**:
+<br/>
 <img src="https://i.imgur.com/HEnFYbj.png" width="400" />
 
 **Appending stats to nicknames automatically (updated every 5 minutes!)**:
+<br/>
 <img src="https://i.imgur.com/vCluxlx.png" width="400" />
 
 ## How it works
