@@ -69,6 +69,6 @@ Deno.serve((req) => {
 });
 
 Deno.cron("updatePlayerData cron job", "*/5 * * * *", async () => {
-  updatePlayerData(client);
+  await updatePlayerData(client);
   await ofetch("https://deno-rivals2-elobot.onrender.com/ping");
 });
