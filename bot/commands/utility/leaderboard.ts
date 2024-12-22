@@ -152,7 +152,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const lowDetailMode = !interaction.options.getBoolean("high_detail_mode");
 
-  // TODO: Make a call to the generateLeaderboardImage Lambda URL from lambdaUrls.json with these parameters
   let buffers: Buffer[];
   try {
     buffers = await executeWithTimeout(

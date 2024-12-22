@@ -27,7 +27,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       ephemeral: true,
     });
     dynamoInteract.addUser(discordid, steamid64, guildid!, nickname);
-    // TODO: Update player data via link from lambdaUrls.json!
     updatePlayerData(interaction.client);
   } catch (error) {
     console.error(error);

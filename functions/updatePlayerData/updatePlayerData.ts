@@ -38,8 +38,9 @@ export default async function updatePlayerData(client: Client<boolean>) {
   const timestamp = Date.now();
 
   while (
-    ($("nextRequestURL")?.text()?.length > 0) &&
-    (users.length > newUserStats.length) && (i < 500)
+    $("nextRequestURL")?.text()?.length > 0 &&
+    users.length > newUserStats.length &&
+    i < 500
   ) {
     if (i > 0) {
       const nextLeaderboard = await ofetch($("nextRequestURL").text());
@@ -86,35 +87,41 @@ export default async function updatePlayerData(client: Client<boolean>) {
 
       const winstreakFormattedCorrectly = (winstreak: string): boolean => {
         if (
-          (winstreak === "0") ||
+          winstreak === "0" ||
           ((winstreak.startsWith("+") || winstreak.startsWith("-")) &&
-            (parseInt(winstreak.slice(1))))
+            parseInt(winstreak.slice(1)))
         ) {
           return true;
         }
         return false;
       };
 
-      if (!prev) { // no previous user found
+      if (!prev) {
+        // no previous user found
         newer.winstreak = "0";
-      } else if (!winstreakFormattedCorrectly(prev.winstreak)) { // prev user + winstreak found, but winstreak is in an odd format
+      } else if (!winstreakFormattedCorrectly(prev.winstreak)) {
+        // prev user + winstreak found, but winstreak is in an odd format
         console.warn(
           `Winstreak ${prev.winstreak} doesn't match format, defaulting to 0`,
         );
         newer.winstreak = "0";
-      } else if (prev.elo === newer.elo) { // no change in ELO, continue with same properly-formatted winstreak
+      } else if (prev.elo === newer.elo) {
+        // no change in ELO, continue with same properly-formatted winstreak
         newer.winstreak = prev.winstreak;
-      } else if (prev.winstreak === "0") { // change in ELO to a 0 winstreak
-        newer.winstreak = (prev.elo < newer.elo) ? "+1" : "-1";
-      } else if (prev.winstreak.startsWith("+")) { // change in ELO to a + winstreak
+      } else if (prev.winstreak === "0") {
+        // change in ELO to a 0 winstreak
+        newer.winstreak = prev.elo < newer.elo ? "+1" : "-1";
+      } else if (prev.winstreak.startsWith("+")) {
+        // change in ELO to a + winstreak
         const posWinstreakInt = parseInt(prev.winstreak.slice(1));
-        newer.winstreak = (prev.elo < newer.elo)
-          ? "+" + ((posWinstreakInt + 1).toString())
+        newer.winstreak = prev.elo < newer.elo
+          ? "+" + (posWinstreakInt + 1).toString()
           : "-1";
-      } else if (prev.winstreak.startsWith("-")) { // change in ELO to a - winstreak
+      } else if (prev.winstreak.startsWith("-")) {
+        // change in ELO to a - winstreak
         const negWinStreakInt = parseInt(prev.winstreak.slice(1));
-        newer.winstreak = (prev.elo > newer.elo)
-          ? "-" + ((negWinStreakInt - 1).toString())
+        newer.winstreak = prev.elo > newer.elo
+          ? "-" + (negWinStreakInt - 1).toString()
           : "+1";
       }
       return newer;
@@ -144,9 +151,9 @@ export default async function updatePlayerData(client: Client<boolean>) {
     client.guilds.cache.forEach(async (guild: Guild) => {
       try {
         let nickname;
-        const member = await guild.members.fetch(user.discordid).catch(() =>
-          null
-        );
+        const member = await guild.members
+          .fetch(user.discordid)
+          .catch(() => null);
         if (!member) {
           return;
         }
@@ -160,7 +167,9 @@ export default async function updatePlayerData(client: Client<boolean>) {
           if (!nickname) {
             console.error(
               `Couldn't find nickname for existing member with nicknames ${
-                Object.values(user.guildid_to_nickname)
+                Object.values(
+                  user.guildid_to_nickname,
+                )
               } in server ${guild.name}`,
             );
             return;

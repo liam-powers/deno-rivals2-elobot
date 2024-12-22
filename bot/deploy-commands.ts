@@ -8,9 +8,7 @@ import "jsr:@std/dotenv/load";
 
 const clientid = Deno.env.get("DISCORD_CLIENT_ID");
 const token = Deno.env.get("DISCORD_TOKEN");
-const testGuildid = Deno.env.get("DISCORD_TEST_GUILD_ID");
-const vibeGuildid = Deno.env.get("DISCORD_VIBE_GUILD_ID");
-if (!clientid || !token || !testGuildid || !vibeGuildid) {
+if (!clientid || !token) {
   throw new Error("Couldn't find .env variables for deploy-commands.ts!");
 }
 

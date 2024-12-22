@@ -11,7 +11,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     const discordid = interaction.user.id;
     await dynamoInteract.updateOptout(discordid, false);
-    // TODO: Update player data via lambdaURL for updatePlayerData!
     updatePlayerData(interaction.client);
 
     await interaction.reply({

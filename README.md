@@ -32,20 +32,19 @@ score and global rank, allowing for leaderboard and player card image generation
 
 ## Getting up and running both the server and the client
 
-- There are 7 unique .env variables you must generate and place in a .env file in the root. These are as follows:
+- There are 5 unique .env variables you must generate and place in a .env file in the root. These are as follows:
 
   1. `AWS_ACCESS_KEY_ID`: The access key to an AWS user, can be found with AWS CLI.
   2. `AWS_SECRET_KEY_ID`: The secret key to an AWS user, can be found with AWS CLI.
   3. `STEAM_API_KEY`: Obtained using [this form](https://steamcommunity.com/dev), and you must have a Steam account.
   4. `DISCORD_TOKEN`: For the remaining variables, they must be generated from Discord. This particular token is found after creating an application [here](https://discord.com/developers/applications) then generating a token under its "Bot" settings tab.
   5. `DISCORD_CLIENT_ID`: Found under the "General Information" settings tab as the Application ID.
-  6. `DISCORD_TEST_GUILD_ID`: After enabling Discord's [Developer Mode](https://www.howtogeek.com/714348/how-to-enable-or-disable-developer-mode-on-discord/), right-click on a server's icon you have admin permission to (you can also create a new one) and copy the ID.
-  7. `DISCORD_VIBE_GUILD_ID`: Similar to the above - Vibe is the name of the Discord server I used the bot on for actual users, but you're welcome to create another empty Discord server.
 
 - To set up the Discord client, you need to do a couple of things:
 
 1. If you don't already have Deno set up, you'll want to install it to your command line. Instructions for that are [here](https://docs.deno.com/runtime/).
 2. Add your newly-created Discord app to your servers by generating an OAuth2 link in the developer window. From the [Developer Portal](https://discord.com/developers/applications), scroll down to the OAuth2 URL generator and give it `applications.commands`, `bot`, `Send Messages`, and `Manage Nicknames` permissions. Then, open the URL you've generated and add it to both of the Discord servers (you may have to open the URL once for each server).
+3. Deploy the commands globally via the `deno task deploy` command.
 
 - To run the server:
 
