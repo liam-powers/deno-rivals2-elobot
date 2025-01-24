@@ -4,7 +4,6 @@ import fs from "node:fs";
 import * as denoPath from "jsr:@std/path";
 import "jsr:@std/dotenv/load";
 import { updatePlayerData } from "@scope/functions";
-import { ofetch } from "ofetch";
 
 const token = Deno.env.get("DISCORD_TOKEN");
 if (!token) {
@@ -60,15 +59,6 @@ console.log("Client logged in!");
 
 updatePlayerData(client);
 
-Deno.serve((req) => {
-  const url = new URL(req.url);
-  if (url.pathname === "/ping") {
-    return new Response("Pong", { status: 200 });
-  }
-  return new Response("Not Found", { status: 404 });
-});
-
 Deno.cron("updatePlayerData cron job", "*/5 * * * *", async () => {
   await updatePlayerData(client);
-  await ofetch("https://deno-rivals2-elobot.onrender.com/ping");
 });
