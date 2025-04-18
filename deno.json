@@ -1,7 +1,11 @@
 {
-  "workspace": ["./bot", "./functions", "./shared"],
+  "workspace": ["./bot", "./shared"],
   "tasks": {
     "start": "deno run -A --env-file=./.env --watch --unstable-cron ./bot/main.ts",
     "deploy": "deno run -A --env-file=./.env ./bot/deploy-commands.ts"
+  },
+  "imports": {
+    "@instantdb/admin": "npm:@instantdb/admin@^0.17.21",
+    "googleapis": "npm:googleapis@^144.0.0"
   }
 }

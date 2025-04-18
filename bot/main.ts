@@ -14,7 +14,9 @@ if (!token) {
 //const __filename = denoPath.fromFileUrl(import.meta.url);
 const __dirname = path.dirname(denoPath.fromFileUrl(import.meta.url));
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+// @ts-ignore client properties
 client.cooldowns = new Collection();
+// @ts-ignore client properties
 client.commands = new Collection();
 
 const foldersPath = path.join(__dirname, "commands");
@@ -29,6 +31,7 @@ for (const folder of commandFolders) {
     const filePath = path.join(commandsPath, file);
     const command = await import(filePath);
     if ("data" in command && "execute" in command) {
+      // @ts-ignore client properties
       client.commands.set(command.data.name, command);
     } else {
       console.log(
