@@ -1,11 +1,11 @@
-import { Client, Collection, GatewayIntentBits } from "discord.js";
-import path from "node:path";
-import fs from "node:fs";
-import * as denoPath from "jsr:@std/path";
-import "jsr:@std/dotenv/load";
-import { updatePlayerData } from "@scope/functions";
+import { Client, Collection, GatewayIntentBits } from 'discord.js';
+import path from 'node:path';
+import fs from 'node:fs';
+import * as denoPath from 'jsr:@std/path';
+import 'jsr:@std/dotenv/load';
+import { updatePlayerData } from '@scope/functions';
 
-const token = Deno.env.get("DISCORD_TOKEN");
+const token = Deno.env.get('DISCORD_TOKEN');
 if (!token) {
   console.log({ token });
   throw new Error("main.ts for bot: Couldn't find DISCORD_TOKEN!");
@@ -17,18 +17,16 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.cooldowns = new Collection();
 client.commands = new Collection();
 
-const foldersPath = path.join(__dirname, "commands");
+const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
   const commandsPath = path.join(foldersPath, folder);
-  const commandFiles = fs.readdirSync(commandsPath).filter((file) =>
-    file.endsWith(".ts")
-  );
+  const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.ts'));
   for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
     const command = await import(filePath);
-    if ("data" in command && "execute" in command) {
+    if ('data' in command && 'execute' in command) {
       client.commands.set(command.data.name, command);
     } else {
       console.log(
@@ -38,10 +36,8 @@ for (const folder of commandFolders) {
   }
 }
 
-const eventsPath = path.join(__dirname, "events");
-const eventFiles = fs.readdirSync(eventsPath).filter((file) =>
-  file.endsWith(".ts")
-);
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath).filter((file) => file.endsWith('.ts'));
 
 for (const file of eventFiles) {
   const filePath = path.join(eventsPath, file);
@@ -55,10 +51,10 @@ for (const file of eventFiles) {
 }
 
 client.login(token);
-console.log("Client logged in!");
+console.log('Client logged in!');
 
 updatePlayerData(client);
 
-Deno.cron("updatePlayerData cron job", "*/5 * * * *", async () => {
+Deno.cron('updatePlayerData cron job', '*/5 * * * *', async () => {
   await updatePlayerData(client);
 });

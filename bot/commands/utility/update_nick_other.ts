@@ -1,29 +1,29 @@
-import { ChatInputCommandInteraction, PermissionFlagsBits } from "discord.js";
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { supabase } from "@scope/shared";
+import { ChatInputCommandInteraction, PermissionFlagsBits } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { supabase } from '@scope/shared';
 
 export const data = new SlashCommandBuilder()
-  .setName("update_nick_other")
+  .setName('update_nick_other')
   .setDescription(
     "ADMIN ONLY. Update the base nickname for anyone's score updates!",
   )
   .addUserOption((option) =>
     option
-      .setName("target")
+      .setName('target')
       .setDescription("The Discord member you'd like to setup the link with.")
       .setRequired(true)
   )
   .addStringOption((option) =>
     option
-      .setName("nickname")
+      .setName('nickname')
       .setDescription("The new nickname you'd like for the user.")
       .setRequired(true)
   )
   .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-  const discordid = interaction.options.getUser("target")!.id;
-  const nickname = interaction.options.getString("nickname");
+  const discordid = interaction.options.getUser('target')!.id;
+  const nickname = interaction.options.getString('nickname');
   const guildid = interaction.guildId;
 
   try {

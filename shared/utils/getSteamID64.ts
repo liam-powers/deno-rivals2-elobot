@@ -1,14 +1,14 @@
-import { ofetch } from "ofetch";
+import { ofetch } from 'ofetch';
 
 export default async function getSteamid64(steamURL: string): Promise<string> {
-  const STEAM_API_KEY = Deno.env.get("STEAM_API_KEY");
+  const STEAM_API_KEY = Deno.env.get('STEAM_API_KEY');
   if (!STEAM_API_KEY) {
     throw new Error("getSteamid64: Couldn't get .env variables!");
   }
 
-  const steamURLArr = steamURL.split("/");
+  const steamURLArr = steamURL.split('/');
   let suffix;
-  if (steamURLArr[steamURLArr.length - 1] == "") {
+  if (steamURLArr[steamURLArr.length - 1] == '') {
     suffix = steamURLArr[steamURLArr.length - 2];
   } else {
     suffix = steamURLArr[steamURLArr.length - 1];
@@ -24,7 +24,7 @@ export default async function getSteamid64(steamURL: string): Promise<string> {
   } else if (res.response.success == 42) {
     steamID64 = suffix;
   } else {
-    throw new Error("Something went wrong fetching the Steam URL...");
+    throw new Error('Something went wrong fetching the Steam URL...');
   }
 
   return steamID64;

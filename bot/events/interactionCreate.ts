@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Collection, Events } from "discord.js";
+import { ChatInputCommandInteraction, Collection, Events } from 'discord.js';
 
 interface Command {
   data: { name: string };
@@ -42,10 +42,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       const seconds = remainingTime % 60;
       const message = await interaction.reply({
         content:
-          `Please wait, you are on a cooldown for \`${command.data.name}\`. You can use it again in ${minutes} minute${minutes !== 1 ? 's' : ''} and ${seconds} second${seconds !== 1 ? 's' : ''}.`,
+          `Please wait, you are on a cooldown for \`${command.data.name}\`. You can use it again in ${minutes} minute${
+            minutes !== 1 ? 's' : ''
+          } and ${seconds} second${seconds !== 1 ? 's' : ''}.`,
         ephemeral: true,
       });
-      
+
       // Delete the message after the cooldown expires
       setTimeout(async () => {
         try {
@@ -55,7 +57,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
           console.error('Error deleting cooldown message:', error);
         }
       }, expirationTime - now);
-      
+
       return;
     }
   }
@@ -69,12 +71,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     console.error(error);
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({
-        content: "There was an error while executing this command!",
+        content: 'There was an error while executing this command!',
         ephemeral: true,
       });
     } else {
       await interaction.reply({
-        content: "There was an error while executing this command!",
+        content: 'There was an error while executing this command!',
         ephemeral: true,
       });
     }

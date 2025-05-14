@@ -1,11 +1,11 @@
-import { ChatInputCommandInteraction } from "discord.js";
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { supabase } from "@scope/shared";
-import { updatePlayerData } from "@scope/functions";
+import { ChatInputCommandInteraction } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { supabase } from '@scope/shared';
+import { updatePlayerData } from '@scope/functions';
 
 export const data = new SlashCommandBuilder()
-  .setName("opt_in")
-  .setDescription("Elect to opt back in to nickname updates.");
+  .setName('opt_in')
+  .setDescription('Elect to opt back in to nickname updates.');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   try {
@@ -19,9 +19,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       ephemeral: true,
     });
   } catch (error) {
-    console.error("Error opting in: ", error);
+    console.error('Error opting in: ', error);
     await interaction.reply({
-      content: "Something went wrong with opting in! Ask @liamhi for help.",
+      content: 'Something went wrong with opting in! Ask @liamhi for help.',
       ephemeral: true,
     });
   }

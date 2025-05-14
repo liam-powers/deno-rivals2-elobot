@@ -1,5 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
-import type { interfaces } from "@scope/shared";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
+import type { interfaces } from '@scope/shared';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
@@ -17,7 +17,7 @@ export async function addUser(
   nickname: string,
 ) {
   if (!guildid) {
-    console.error("Received null guildid:", guildid);
+    console.error('Received null guildid:', guildid);
     return;
   }
 
@@ -27,7 +27,7 @@ export async function addUser(
       .upsert({
         discord_id: discordid,
         steam_id64: steamId64,
-        optout: false
+        optout: false,
       });
 
     if (userError) throw userError;
@@ -37,14 +37,14 @@ export async function addUser(
       .upsert({
         discord_id: discordid,
         guild_id: guildid,
-        nickname: nickname
+        nickname: nickname,
       });
 
     if (nicknameError) throw nicknameError;
 
     console.log(`addUser(): User with nickname ${nickname} added successfully`);
   } catch (error) {
-    console.error("Error adding user:", error);
+    console.error('Error adding user:', error);
     throw error;
   }
 }
@@ -65,16 +65,16 @@ export async function getUsers(): Promise<interfaces.User[]> {
 
     if (error) throw error;
 
-    return users.map(user => ({
+    return users.map((user) => ({
       discordid: user.discord_id,
       steamid64: user.steam_id64,
       optout: user.optout,
       guildid_to_nickname: Object.fromEntries(
-        user.user_nicknames.map((n: any) => [n.guild_id, n.nickname])
-      )
+        user.user_nicknames.map((n: any) => [n.guild_id, n.nickname]),
+      ),
     }));
   } catch (error) {
-    console.error("Error getting users:", error);
+    console.error('Error getting users:', error);
     return [];
   }
 }
@@ -103,11 +103,11 @@ export async function getUser(discordid: string): Promise<interfaces.User | unde
       steamid64: user.steam_id64,
       optout: user.optout,
       guildid_to_nickname: Object.fromEntries(
-        user.user_nicknames.map((n: any) => [n.guild_id, n.nickname])
-      )
+        user.user_nicknames.map((n: any) => [n.guild_id, n.nickname]),
+      ),
     };
   } catch (error) {
-    console.error("Error getting user:", error);
+    console.error('Error getting user:', error);
     return undefined;
   }
 }
@@ -116,25 +116,25 @@ export async function getUser(discordid: string): Promise<interfaces.User | unde
 export async function addUserStatsEntries(userStatsData: interfaces.UserStats[]) {
   try {
     if (userStatsData.length === 0) {
-      console.error("addUserStatsEntries(): received empty userStatsData. Returning!");
+      console.error('addUserStatsEntries(): received empty userStatsData. Returning!');
       return;
     }
 
     const { error } = await supabase
       .from('user_stats')
       .upsert(
-        userStatsData.map(stats => ({
+        userStatsData.map((stats) => ({
           steam_id64: stats.steamid64,
           timestamp: stats.timestamp,
           elo: stats.elo,
           rank: stats.rank,
-          winstreak: stats.winstreak
-        }))
+          winstreak: stats.winstreak,
+        })),
       );
 
     if (error) throw error;
   } catch (error) {
-    console.error("Error adding user stats:", error);
+    console.error('Error adding user stats:', error);
     throw error;
   }
 }
@@ -149,7 +149,7 @@ export async function getLatestUsersStats(): Promise<interfaces.UserStats[] | un
       .single();
 
     if (timestampError?.code === 'PGRST116') {
-      console.log("No user stats entries found in the database yet.");
+      console.log('No user stats entries found in the database yet.');
       return undefined;
     }
     if (timestampError) throw timestampError;
@@ -162,19 +162,19 @@ export async function getLatestUsersStats(): Promise<interfaces.UserStats[] | un
 
     if (statsError) throw statsError;
     if (!stats || stats.length === 0) {
-      console.log("No user stats found for the latest timestamp.");
+      console.log('No user stats found for the latest timestamp.');
       return undefined;
     }
 
-    return stats.map(stat => ({
+    return stats.map((stat) => ({
       steamid64: stat.steam_id64,
       timestamp: stat.timestamp,
       elo: stat.elo,
       rank: stat.rank,
-      winstreak: stat.winstreak
+      winstreak: stat.winstreak,
     }));
   } catch (error) {
-    console.error("Error getting latest user stats:", error);
+    console.error('Error getting latest user stats:', error);
     return undefined;
   }
 }
@@ -190,12 +190,12 @@ export async function updateNickname(
       .upsert({
         discord_id: discordid,
         guild_id: guildid,
-        nickname: nickname
+        nickname: nickname,
       });
 
     if (error) throw error;
   } catch (error) {
-    console.error("Error updating nickname:", error);
+    console.error('Error updating nickname:', error);
     throw error;
   }
 }
@@ -209,7 +209,7 @@ export async function updateOptout(discordid: string, optout: boolean) {
 
     if (error) throw error;
   } catch (error) {
-    console.error("Error updating optout:", error);
+    console.error('Error updating optout:', error);
     throw error;
   }
 }
@@ -223,7 +223,7 @@ export async function deleteUser(discordid: string) {
 
     if (error) throw error;
   } catch (error) {
-    console.error("deleteUser() error: ", error);
+    console.error('deleteUser() error: ', error);
     throw error;
   }
-} 
+}

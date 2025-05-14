@@ -1,20 +1,20 @@
-import { ofetch } from "ofetch";
-import type { Guild } from "discord.js";
-import { getNameColor, type interfaces } from "@scope/shared";
-import sharp from "sharp";
-import { Buffer } from "node:buffer";
+import { ofetch } from 'ofetch';
+import type { Guild } from 'discord.js';
+import { getNameColor, type interfaces } from '@scope/shared';
+import sharp from 'sharp';
+import { Buffer } from 'node:buffer';
 
 export default async function generateLeaderboardImage(
   usersLeaderboardInfo: interfaces.UserLeaderboardInfo[],
   guild: Guild,
   entriesPerColumn = 10,
-  descriptionColor = "white",
-  backgroundColor = "black",
+  descriptionColor = 'white',
+  backgroundColor = 'black',
   lowDetailMode = true,
 ): Promise<Buffer[]> {
   const buffers: Buffer[] = [];
   if (usersLeaderboardInfo.length === 0) {
-    console.log("Given empty usersLeaderboardInfo... returning.");
+    console.log('Given empty usersLeaderboardInfo... returning.');
     return buffers;
   }
   const readableTime = new Date().toLocaleString();
@@ -61,7 +61,7 @@ export default async function generateLeaderboardImage(
 
         const nameColor = getNameColor(entry.elo);
         const avatarBuffer = new Uint8Array(
-          await ofetch(entry.imageURL, { responseType: "arrayBuffer" }),
+          await ofetch(entry.imageURL, { responseType: 'arrayBuffer' }),
         );
 
         const resizedAvatarBuffer = await sharp(avatarBuffer)
@@ -89,7 +89,7 @@ export default async function generateLeaderboardImage(
                       ${entry.elo}
                   </text>
               </svg>`,
-                  "utf-8",
+                  'utf-8',
                 )
                 : Buffer.from(
                   `<svg width="${textAreaWidth}" height="${entryHeight}">
@@ -109,7 +109,7 @@ export default async function generateLeaderboardImage(
                                     Winstreak: ${entry.winstreak}
                                 </text>
                             </svg>`,
-                  "utf-8",
+                  'utf-8',
                 ),
               top: 0,
               left: 0,
@@ -181,7 +181,7 @@ export default async function generateLeaderboardImage(
                                 Average Rank: ${avgGlobalRank.toFixed(0)}
                             </text>
                         </svg>`,
-              "utf-8",
+              'utf-8',
             ),
             top: 0,
             left: 0,
@@ -217,10 +217,9 @@ export default async function generateLeaderboardImage(
     buffers.push(finalImageBuffer);
   }
 
-  const discordIconURL =
-    `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
+  const discordIconURL = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
   const guildIconBuffer = await ofetch(discordIconURL, {
-    responseType: "arrayBuffer",
+    responseType: 'arrayBuffer',
   });
 
   const guildIconScalar = Math.floor(
@@ -287,7 +286,7 @@ export default async function generateLeaderboardImage(
                             Generated ${readableTime}
                         </text>
                     </svg>`,
-            "utf-8",
+            'utf-8',
           ),
           top: 0,
           left: 0,

@@ -7,28 +7,28 @@ export default function cleanHexCode(
 
   const hexSet = new Set();
   const hexVals = [
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
+    '0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
   ];
   hexVals.forEach((hexVal) => hexSet.add(hexVal));
 
   try {
     let currHexCode = hexCode;
-    if (currHexCode.startsWith("#")) {
+    if (currHexCode.startsWith('#')) {
       currHexCode = currHexCode.slice(1);
     }
 
@@ -41,7 +41,7 @@ export default function cleanHexCode(
         throw new Error();
       }
     }
-    currHexCode = "#" + currHexCode;
+    currHexCode = '#' + currHexCode;
     return currHexCode;
   } catch (error) {
     throw new Error(`Error cleaning hex code! ${error}`);

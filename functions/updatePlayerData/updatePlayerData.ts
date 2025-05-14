@@ -1,11 +1,7 @@
-import type { Client, Guild } from "discord.js";
-import {
-  canBotModifyNickname,
-  supabase,
-  type interfaces,
-} from "@scope/shared";
-import { ofetch } from "ofetch";
-import * as cheerio from "cheerio";
+import type { Client, Guild } from 'discord.js';
+import { canBotModifyNickname, type interfaces, supabase } from '@scope/shared';
+import { ofetch } from 'ofetch';
+import * as cheerio from 'cheerio';
 
 // This is the main cron job and the backbone of the score/elo/win-loss tracking that the bot does.
 // 1. Grabs all of the discord id's and steamid's from AWS (DynamoDB?).
@@ -31,37 +27,37 @@ export default async function updatePlayerData(client: Client<boolean>) {
   // we'll cap at 100 pages parsed to avoid an infinite loop for any reason
   let newUserStats: interfaces.UserStats[] = [];
   const leaderboard = await ofetch(
-    "https://steamcommunity.com/stats/2217000/leaderboards/16200142?xml=1", // spring 2025 leaderboard
+    'https://steamcommunity.com/stats/2217000/leaderboards/16200142?xml=1', // spring 2025 leaderboard
   );
   let $ = cheerio.load(leaderboard, { xmlMode: true });
   let i = 0; // limit parsing to 500 leaderboard pages, if it gets over that number something has gone very wrong (currently around 10-15 leaderboard pages)
   const timestamp = Date.now();
 
   while (
-    $("nextRequestURL")?.text()?.length > 0 &&
+    $('nextRequestURL')?.text()?.length > 0 &&
     users.length > newUserStats.length &&
     i < 500
   ) {
     if (i > 0) {
-      const nextLeaderboard = await ofetch($("nextRequestURL").text());
+      const nextLeaderboard = await ofetch($('nextRequestURL').text());
       $ = cheerio.load(nextLeaderboard, { xmlMode: true });
     }
-    const entries = $("entry");
+    const entries = $('entry');
 
     entries.each((_index, entry) => {
-      const steamid64 = $(entry).find("steamid").text();
+      const steamid64 = $(entry).find('steamid').text();
       if (!steamid64 || !steamid64s.has(steamid64)) {
         return;
       }
-      const score = $(entry).find("score").text();
-      const rank = $(entry).find("rank").text();
+      const score = $(entry).find('score').text();
+      const rank = $(entry).find('rank').text();
 
       newUserStats.push({
         steamid64,
         timestamp,
         elo: parseInt(score),
         rank: parseInt(rank),
-        winstreak: "TBD",
+        winstreak: 'TBD',
       });
     });
     i++;
@@ -75,7 +71,7 @@ export default async function updatePlayerData(client: Client<boolean>) {
   if (!prevUserStats || prevUserStats.length === 0) {
     newUserStats = newUserStats.map((userStats) => ({
       ...userStats,
-      winstreak: "0",
+      winstreak: '0',
     }));
   } else {
     const prevUserStatsMap = new Map(
@@ -87,8 +83,8 @@ export default async function updatePlayerData(client: Client<boolean>) {
 
       const winstreakFormattedCorrectly = (winstreak: string): boolean => {
         if (
-          winstreak === "0" ||
-          ((winstreak.startsWith("+") || winstreak.startsWith("-")) &&
+          winstreak === '0' ||
+          ((winstreak.startsWith('+') || winstreak.startsWith('-')) &&
             parseInt(winstreak.slice(1)))
         ) {
           return true;
@@ -98,31 +94,27 @@ export default async function updatePlayerData(client: Client<boolean>) {
 
       if (!prev) {
         // no previous user found
-        newer.winstreak = "0";
+        newer.winstreak = '0';
       } else if (!winstreakFormattedCorrectly(prev.winstreak)) {
         // prev user + winstreak found, but winstreak is in an odd format
         console.warn(
           `Winstreak ${prev.winstreak} doesn't match format, defaulting to 0`,
         );
-        newer.winstreak = "0";
+        newer.winstreak = '0';
       } else if (prev.elo === newer.elo) {
         // no change in ELO, continue with same properly-formatted winstreak
         newer.winstreak = prev.winstreak;
-      } else if (prev.winstreak === "0") {
+      } else if (prev.winstreak === '0') {
         // change in ELO to a 0 winstreak
-        newer.winstreak = prev.elo < newer.elo ? "+1" : "-1";
-      } else if (prev.winstreak.startsWith("+")) {
+        newer.winstreak = prev.elo < newer.elo ? '+1' : '-1';
+      } else if (prev.winstreak.startsWith('+')) {
         // change in ELO to a + winstreak
         const posWinstreakInt = parseInt(prev.winstreak.slice(1));
-        newer.winstreak = prev.elo < newer.elo
-          ? "+" + (posWinstreakInt + 1).toString()
-          : "-1";
-      } else if (prev.winstreak.startsWith("-")) {
+        newer.winstreak = prev.elo < newer.elo ? '+' + (posWinstreakInt + 1).toString() : '-1';
+      } else if (prev.winstreak.startsWith('-')) {
         // change in ELO to a - winstreak
         const negWinStreakInt = parseInt(prev.winstreak.slice(1));
-        newer.winstreak = prev.elo > newer.elo
-          ? "-" + (negWinStreakInt - 1).toString()
-          : "+1";
+        newer.winstreak = prev.elo > newer.elo ? '-' + (negWinStreakInt - 1).toString() : '+1';
       }
       return newer;
     });
@@ -146,7 +138,7 @@ export default async function updatePlayerData(client: Client<boolean>) {
       return;
     }
 
-    const suffix = " " + "(" + stats.elo + "|" + "#" + stats.rank + ")";
+    const suffix = ' ' + '(' + stats.elo + '|' + '#' + stats.rank + ')';
 
     client.guilds.cache.forEach(async (guild: Guild) => {
       try {

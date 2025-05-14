@@ -1,13 +1,13 @@
-import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v10";
-import { ofetch } from "npm:ofetch";
-import fs from "node:fs";
-import path from "node:path";
-import * as denoPath from "jsr:@std/path";
-import "jsr:@std/dotenv/load";
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v10';
+import { ofetch } from 'npm:ofetch';
+import fs from 'node:fs';
+import path from 'node:path';
+import * as denoPath from 'jsr:@std/path';
+import 'jsr:@std/dotenv/load';
 
-const clientid = Deno.env.get("DISCORD_CLIENT_ID");
-const token = Deno.env.get("DISCORD_TOKEN");
+const clientid = Deno.env.get('DISCORD_CLIENT_ID');
+const token = Deno.env.get('DISCORD_TOKEN');
 if (!clientid || !token) {
   throw new Error("Couldn't find .env variables for deploy-commands.ts!");
 }
@@ -16,20 +16,18 @@ const __dirname = path.dirname(denoPath.fromFileUrl(import.meta.url));
 
 const commands = [];
 // Grab all the command folders from the commands directory you created earlier
-const foldersPath = path.join(__dirname, "commands");
+const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
   // Grab all the command files from the commands directory you created earlier
   const commandsPath = path.join(foldersPath, folder);
-  const commandFiles = fs.readdirSync(commandsPath).filter((file) =>
-    file.endsWith(".ts")
-  );
+  const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.ts'));
   // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
   for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
     const command = await import(filePath);
-    if ("data" in command && "execute" in command) {
+    if ('data' in command && 'execute' in command) {
       commands.push(command.data.toJSON());
     } else {
       console.log(
@@ -52,22 +50,22 @@ const rest = new REST().setToken(token);
     await rest.put(Routes.applicationCommands(clientid), { body: [] }); // Clear all global commands
     let data;
     try {
-      const DISCORD_CLIENT_ID = Deno.env.get("DISCORD_CLIENT_ID");
+      const DISCORD_CLIENT_ID = Deno.env.get('DISCORD_CLIENT_ID');
       data = await ofetch(
         `https://discord.com/api/v10/applications/${DISCORD_CLIENT_ID}/commands`,
         {
           // @ts-ignore doesn't like PUT for some reason, but this is defined in ofetch api
-          method: "PUT",
+          method: 'PUT',
           headers: {
             Authorization: `Bot ${token}`,
-            "Content-Type": "application/json; charset=UTF-8",
-            "User-Agent": `DiscordBot (discord.js, 14.16.3 (modified))`,
+            'Content-Type': 'application/json; charset=UTF-8',
+            'User-Agent': `DiscordBot (discord.js, 14.16.3 (modified))`,
           },
           body: JSON.stringify(commands),
         },
       );
     } catch (err) {
-      console.error("error adding commands:", err);
+      console.error('error adding commands:', err);
       return;
     }
 

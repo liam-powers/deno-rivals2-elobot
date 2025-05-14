@@ -1,13 +1,13 @@
-import { ChatInputCommandInteraction } from "discord.js";
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { canBotModifyNickname, supabase } from "@scope/shared";
+import { ChatInputCommandInteraction } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { canBotModifyNickname, supabase } from '@scope/shared';
 
 export const data = new SlashCommandBuilder()
-  .setName("opt_out")
-  .setDescription("Elect to opt out of nickname updates.")
+  .setName('opt_out')
+  .setDescription('Elect to opt out of nickname updates.')
   .addStringOption((option) =>
     option
-      .setName("new_nickname")
+      .setName('new_nickname')
       .setDescription("The nickname you'd like the bot to set your name to.")
       .setRequired(true)
   );
@@ -23,25 +23,23 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const bot = member.guild.members.me;
 
     if (bot && canBotModifyNickname(guild!, member, bot)) {
-      const nickname = interaction.options.getString("new_nickname");
+      const nickname = interaction.options.getString('new_nickname');
       supabase.updateNickname(discordid, guild!.id, nickname!);
       await member.setNickname(nickname);
       await interaction.reply({
-        content:
-          "You've been opted out, and I've changed your nickname to what you specified.",
+        content: "You've been opted out, and I've changed your nickname to what you specified.",
         ephemeral: true,
       });
     } else {
       await interaction.reply({
-        content:
-          "You've been opted out, but I lack permission to change your nickname.",
+        content: "You've been opted out, but I lack permission to change your nickname.",
         ephemeral: true,
       });
     }
   } catch (error) {
-    console.error("Error opting out: ", error);
+    console.error('Error opting out: ', error);
     await interaction.reply({
-      content: "Something went wrong with opting out! Ask @liamhi for help.",
+      content: 'Something went wrong with opting out! Ask @liamhi for help.',
       ephemeral: true,
     });
   }

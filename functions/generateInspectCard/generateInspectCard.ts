@@ -1,8 +1,8 @@
-import { supabase, getNameColor, type interfaces } from "@scope/shared";
-import { ofetch } from "ofetch";
-import sharp from "sharp";
-import { Buffer } from "node:buffer";
-import "jsr:@std/dotenv/load";
+import { getNameColor, type interfaces, supabase } from '@scope/shared';
+import { ofetch } from 'ofetch';
+import sharp from 'sharp';
+import { Buffer } from 'node:buffer';
+import 'jsr:@std/dotenv/load';
 
 export default async function generateInspectCard(
   user: interfaces.User,
@@ -10,16 +10,16 @@ export default async function generateInspectCard(
   descriptionColor: string,
   backgroundColor: string,
 ): Promise<Buffer> {
-  const STEAM_API_KEY = Deno.env.get("STEAM_API_KEY");
+  const STEAM_API_KEY = Deno.env.get('STEAM_API_KEY');
   if (!STEAM_API_KEY) {
-    throw new Error("Failed to get STEAM_API_KEY inside generateInspectCard!");
+    throw new Error('Failed to get STEAM_API_KEY inside generateInspectCard!');
   }
 
   const latestUserStats = await supabase.getLatestUserStats(
     user.steamid64,
   );
   if (!latestUserStats) {
-    throw new Error("Failed to get userStats inside generateInspectCard!");
+    throw new Error('Failed to get userStats inside generateInspectCard!');
   }
 
   const readableTime = new Date().toLocaleString();
@@ -30,7 +30,7 @@ export default async function generateInspectCard(
   const avatarSize = 200;
 
   const avatarURL = playerSummary.response.players[0].avatarfull;
-  const avatarBuffer = await ofetch(avatarURL, { responseType: "arrayBuffer" });
+  const avatarBuffer = await ofetch(avatarURL, { responseType: 'arrayBuffer' });
   const resizedAvatarBuffer = await sharp(Buffer.from(avatarBuffer))
     .resize(avatarSize, avatarSize)
     .png()

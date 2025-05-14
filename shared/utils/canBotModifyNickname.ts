@@ -1,4 +1,4 @@
-import { type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
+import { type Guild, type GuildMember, PermissionFlagsBits } from 'discord.js';
 
 export default function canBotModifyNickname(
   guild: Guild,
