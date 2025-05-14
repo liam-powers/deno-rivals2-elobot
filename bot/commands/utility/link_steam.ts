@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { supabase, getSteamid64 } from "@scope/shared";
+import { supabase, getSteamid64, cleanNickname } from "@scope/shared";
 import { updatePlayerData } from "@scope/functions";
 
 export const data = new SlashCommandBuilder()
@@ -17,7 +17,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     const discordid = interaction.user.id;
     const steamURL = interaction.options.getString("steam_url");
-    const nickname = interaction.user.displayName;
+    const nickname = cleanNickname(interaction.user.displayName);
     const guildid = interaction.guildId;
 
     const steamid64 = await getSteamid64(steamURL!);

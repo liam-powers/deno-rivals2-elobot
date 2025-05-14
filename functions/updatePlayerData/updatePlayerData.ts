@@ -31,7 +31,7 @@ export default async function updatePlayerData(client: Client<boolean>) {
   // we'll cap at 100 pages parsed to avoid an infinite loop for any reason
   let newUserStats: interfaces.UserStats[] = [];
   const leaderboard = await ofetch(
-    "https://steamcommunity.com/stats/2217000/leaderboards/14800950/?xml=1",
+    "https://steamcommunity.com/stats/2217000/leaderboards/16200142?xml=1", // spring 2025 leaderboard
   );
   let $ = cheerio.load(leaderboard, { xmlMode: true });
   let i = 0; // limit parsing to 500 leaderboard pages, if it gets over that number something has gone very wrong (currently around 10-15 leaderboard pages)

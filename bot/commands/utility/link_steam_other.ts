@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { supabase, getSteamid64 } from "@scope/shared";
+import { supabase, getSteamid64, cleanNickname } from "@scope/shared";
 import { updatePlayerData } from "@scope/functions";
 
 export const data = new SlashCommandBuilder()
@@ -37,7 +37,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    const nickname = member.nickname || member.displayName;
+    const nickname = cleanNickname(member.nickname || member.displayName);
 
     const steamid64 = await getSteamid64(steamURL!);
     await interaction.reply({
