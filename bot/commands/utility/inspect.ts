@@ -2,7 +2,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
   cleanHexCode,
-  dynamoInteract,
+  supabase,
   executeWithTimeout,
 } from "@scope/shared";
 import { generateInspectCard } from "@scope/functions";
@@ -52,7 +52,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const user = await dynamoInteract.getUser(target!.id);
+  const user = await supabase.getUser(target!.id);
   if (!user) {
     await interaction.editReply(`Couldn't find target ${target} in database!`);
     return;

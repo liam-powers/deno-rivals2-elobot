@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { dynamoInteract } from "@scope/shared";
+import { supabase } from "@scope/shared";
 import { ChatInputCommandInteraction } from "discord.js";
 
 export const data = new SlashCommandBuilder()
@@ -19,7 +19,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   const discordid = interaction.options.getUser("target")!.id;
   try {
-    await dynamoInteract.deleteUser(discordid);
+    await supabase.deleteUser(discordid);
     await interaction.reply({
       content: "Successfully deleted user",
       ephemeral: true,

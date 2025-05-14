@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { dynamoInteract } from "@scope/shared";
+import { supabase } from "@scope/shared";
 import { updatePlayerData } from "@scope/functions";
 
 export const data = new SlashCommandBuilder()
@@ -20,7 +20,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     const target = interaction.options.getUser("target");
     const discordid = target!.id;
-    await dynamoInteract.updateOptout(discordid, false);
+    await supabase.updateOptout(discordid, false);
 
     updatePlayerData(interaction.client);
 

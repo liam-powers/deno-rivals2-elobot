@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ChatInputCommandInteraction, PermissionFlagsBits } from "discord.js";
-import { canBotModifyNickname, dynamoInteract } from "@scope/shared";
+import { canBotModifyNickname, supabase } from "@scope/shared";
 
 export const data = new SlashCommandBuilder()
   .setName("opt_out_other")
@@ -25,7 +25,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     const target = interaction.options.getUser("target");
     const discordid = target!.id;
-    await dynamoInteract.updateOptout(discordid, true);
+    await supabase.updateOptout(discordid, true);
 
     const guild = interaction.guild;
     const member = await guild!.members.fetch(discordid);
@@ -33,7 +33,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     if (bot && canBotModifyNickname(guild!, member, bot)) {
       const nickname = interaction.options.getString("new_nickname");
-      dynamoInteract.updateNickname(discordid, guild!.id, nickname!);
+      supabase.updateNickname(discordid, guild!.id, nickname!);
       await member.setNickname(nickname);
       await interaction.reply({
         content:

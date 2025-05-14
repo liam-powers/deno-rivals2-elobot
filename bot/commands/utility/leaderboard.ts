@@ -2,7 +2,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
   cleanHexCode,
-  dynamoInteract,
+  supabase,
   executeWithTimeout,
   type interfaces,
 } from "@scope/shared";
@@ -63,13 +63,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     ephemeral: false,
   });
 
-  const latestUserStats = await dynamoInteract.getLatestUsersStats();
+  const latestUserStats = await supabase.getLatestUsersStats();
   if (!latestUserStats) {
     console.error("leaderboard command: couldn't find latestUserStats!");
     await interaction.editReply("Something went wrong!");
     return;
   }
-  const users = await dynamoInteract.getUsers();
+  const users = await supabase.getUsers();
 
   // filter latestUserStats so we only have entries with steamid's that are featured in this guild
   // const steamid64ToUser: Record<string, User> = {};

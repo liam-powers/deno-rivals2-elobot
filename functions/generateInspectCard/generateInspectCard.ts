@@ -1,4 +1,4 @@
-import { dynamoInteract, getNameColor, type interfaces } from "@scope/shared";
+import { supabase, getNameColor, type interfaces } from "@scope/shared";
 import { ofetch } from "ofetch";
 import sharp from "sharp";
 import { Buffer } from "node:buffer";
@@ -15,7 +15,7 @@ export default async function generateInspectCard(
     throw new Error("Failed to get STEAM_API_KEY inside generateInspectCard!");
   }
 
-  const latestUserStats = await dynamoInteract.getLatestUserStats(
+  const latestUserStats = await supabase.getLatestUserStats(
     user.steamid64,
   );
   if (!latestUserStats) {

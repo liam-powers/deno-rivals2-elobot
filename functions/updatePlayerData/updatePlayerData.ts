@@ -1,7 +1,7 @@
 import type { Client, Guild } from "discord.js";
 import {
   canBotModifyNickname,
-  dynamoInteract,
+  supabase,
   type interfaces,
 } from "@scope/shared";
 import { ofetch } from "ofetch";
@@ -19,7 +19,7 @@ import * as cheerio from "cheerio";
 //        steamid for the service, AKA anybody we grabbed info for from our Cheerio XML parsing.
 export default async function updatePlayerData(client: Client<boolean>) {
   // 1.
-  const users: interfaces.User[] = await dynamoInteract.getUsers();
+  const users: interfaces.User[] = await supabase.getUsers();
   if (!users) {
     console.error("updatePlayerData() couldn't find users!");
     return;
@@ -68,7 +68,7 @@ export default async function updatePlayerData(client: Client<boolean>) {
   }
 
   // 3. figure out winstreak for each player
-  const prevUserStats: interfaces.UserStats[] | undefined = await dynamoInteract
+  const prevUserStats: interfaces.UserStats[] | undefined = await supabase
     .getLatestUsersStats();
 
   // if there are not latest user stats, we'll default winstreaks to 0
@@ -129,7 +129,7 @@ export default async function updatePlayerData(client: Client<boolean>) {
   }
 
   // 4. add our user stats entries
-  await dynamoInteract.addUserStatsEntries(newUserStats);
+  await supabase.addUserStatsEntries(newUserStats);
 
   // 5. append the new ranked scores to Discord nicknames
   // remember, users has all our discordids, nicknames, and steamids
@@ -174,7 +174,7 @@ export default async function updatePlayerData(client: Client<boolean>) {
             );
             return;
           }
-          await dynamoInteract.updateNickname(
+          await supabase.updateNickname(
             user.discordid,
             guild.id,
             nickname,

@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { dynamoInteract, getSteamid64 } from "@scope/shared";
+import { supabase, getSteamid64 } from "@scope/shared";
 import { updatePlayerData } from "@scope/functions";
 
 export const data = new SlashCommandBuilder()
@@ -26,7 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         "Your request to link your Steam has been received! Your info will be updated shortly.",
       ephemeral: true,
     });
-    dynamoInteract.addUser(discordid, steamid64, guildid!, nickname);
+    supabase.addUser(discordid, steamid64, guildid!, nickname);
     updatePlayerData(interaction.client);
   } catch (error) {
     console.error(error);

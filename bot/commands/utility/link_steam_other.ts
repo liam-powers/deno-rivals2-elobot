@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { dynamoInteract, getSteamid64 } from "@scope/shared";
+import { supabase, getSteamid64 } from "@scope/shared";
 import { updatePlayerData } from "@scope/functions";
 
 export const data = new SlashCommandBuilder()
@@ -46,7 +46,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       ephemeral: true,
     });
 
-    await dynamoInteract.addUser(discordid, steamid64, guildid!, nickname);
+    await supabase.addUser(discordid, steamid64, guildid!, nickname);
 
     updatePlayerData(interaction.client);
   } catch (error) {

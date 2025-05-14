@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ChatInputCommandInteraction } from "discord.js";
-import { dynamoInteract } from "@scope/shared";
+import { supabase } from "@scope/shared";
 
 export const data = new SlashCommandBuilder()
   .setName("update_nick")
@@ -18,7 +18,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const guildid = interaction.guildId;
 
   try {
-    await dynamoInteract.updateNickname(discordid, guildid, nickname!);
+    await supabase.updateNickname(discordid, guildid, nickname!);
     await interaction.reply({
       content:
         `Updated your nickname to ${nickname}! It should populate in the next 5 minutes.`,
