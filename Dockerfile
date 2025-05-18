@@ -1,5 +1,5 @@
 # docker build -t rivals2-elobot . && docker run -it -p 1993:1993 rivals2-elobot
-FROM denoland/deno:2.3.1
+FROM denoland/deno:latest
 EXPOSE 1993
 WORKDIR /app
 
