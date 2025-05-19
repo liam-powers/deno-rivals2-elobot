@@ -50,6 +50,10 @@ for (const file of eventFiles) {
   }
 }
 
+client.once('ready', () => {
+  client.user!.setActivity("Type /link_steam to get started!");
+});
+
 client.login(token);
 console.log('Client logged in!');
 
