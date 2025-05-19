@@ -15,7 +15,14 @@ RUN apt-get update && apt-get install -y \
 USER deno
 RUN fc-cache -fv
 
+# Switch back to root to copy files
+USER root
 COPY . .
+# Change ownership of all files to deno user
+RUN chown -R deno:deno /app
+# Switch back to deno user
+USER deno
+
 RUN deno cache ./bot/main.ts
 
 CMD ["task", "start"]
