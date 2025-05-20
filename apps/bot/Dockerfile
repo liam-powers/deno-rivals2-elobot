@@ -23,6 +23,6 @@ RUN chown -R deno:deno /app
 # Switch back to deno user
 USER deno
 
-RUN deno cache ./bot/main.ts
+RUN deno cache ./main.ts
 
 CMD ["task", "start"]
