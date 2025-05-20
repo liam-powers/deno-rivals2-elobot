@@ -1,0 +1,36 @@
+{
+  "workspace": ["./utils"],
+  "tasks": {
+    "start": "deno run -A --env-file=./.env --watch --unstable-cron main.ts",
+    "deploy": "deno run -A --env-file=./.env deploy-commands.ts"
+  },
+  "compilerOptions": {
+    "lib": ["deno.window"],
+    "strict": true
+  },
+  "lint": {
+    "include": ["**/"],
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "fmt": {
+    "files": {
+      "include": ["**/"]
+    },
+    "options": {
+      "useTabs": false,
+      "lineWidth": 100,
+      "indentWidth": 2,
+      "singleQuote": true,
+      "proseWrap": "preserve"
+    }
+  },
+  "imports": {
+    "@discordjs/builders": "npm:@discordjs/builders@^1.11.2",
+    "@discordjs/rest": "npm:@discordjs/rest@^2.5.0",
+    "discord-api-types": "npm:discord-api-types@^0.38.8",
+    "discord.js": "npm:discord.js@^14.19.3",
+    "ofetch": "npm:ofetch@^1.4.1"
+  }
+}

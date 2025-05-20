@@ -1,0 +1,11 @@
+{
+    "name": "@bot/utils",
+    "exports": {
+        "./helpers": "./helpers.ts",
+        "./updatePlayerData": "./updatePlayerData.ts",
+        "./supabase": "./supabase.ts"
+    },
+    "imports": {
+        "cheerio": "npm:cheerio@^1.0.0"
+    }
+}
