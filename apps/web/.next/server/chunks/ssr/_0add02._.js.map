@@ -1,9 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///Users/liam/Documents/Code/projects/deno-rivals2-elobot/apps/web/src/app/layout.tsx"],"sourcesContent":["import type { Metadata } from \"next\";\nimport \"./globals.css\";\n\nexport const metadata: Metadata = {\n    title: \"Rivals 2 Elo Bot\",\n    description: \"Created by @liamhi on Discord\",\n};\n\nexport default function RootLayout({\n    children,\n}: Readonly<{\n    children: React.ReactNode;\n}>) {\n    return (\n        <html lang=\"en\">\n            <body>\n                {children}\n            </body>\n        </html>\n    );\n}\n"],"names":[],"mappings":";;;;;;;AAGO,MAAM,WAAqB;IAC9B,OAAO;IACP,aAAa;AACjB;AAEe,SAAS,WAAW,EAC/B,QAAQ,EAGV;IACE,qBACI,ucAAC;QAAK,MAAK;kBACP,cAAA,ucAAC;sBACI;;;;;;;;;;;AAIjB"}},
-    {"offset": {"line": 34, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
-    {"offset": {"line": 45, "column": 0}, "map": {"version":3,"sources":["file:///Users/liam/Documents/Code/projects/deno-rivals2-elobot/apps/web/node_modules/.pnpm/next%4015.0.3_react-dom%4019.0.0-rc-66855b96-20241106_react%4019.0.0-rc-66855b96-20241106__react%4019.0.0-rc-66855b96-20241106/node_modules/next/src/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.ts"],"sourcesContent":["module.exports = require('../../module.compiled').vendored[\n  'react-rsc'\n].ReactJsxDevRuntime\n"],"names":["module","exports","require","vendored","ReactJsxDevRuntime"],"mappings":";AAAAA,OAAOC,OAAO,GAAGC,QAAQ,oQAAyBC,QAAQ,CACxD,YACD,CAACC,kBAAkB","ignoreList":[0]}},
-    {"offset": {"line": 47, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
-}
