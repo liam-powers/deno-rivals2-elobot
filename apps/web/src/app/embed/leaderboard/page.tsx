@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import Image from 'next/image';
 
 // Create a single instance of the Supabase client
 const supabase = createClient();
@@ -14,6 +15,11 @@ interface LeaderboardEntry {
   };
   elo: number;
   rank: number;
+}
+
+interface SteamPlayer {
+  steamid: string;
+  avatarfull: string;
 }
 
 // Function to fetch Steam avatars in batch
@@ -35,7 +41,7 @@ async function getSteamAvatars(steamIds: string[]): Promise<Record<string, strin
     const data = await response.json();
     const avatarMap: Record<string, string> = {};
     if (data.response?.players) {
-      data.response.players.forEach((player: any) => {
+      data.response.players.forEach((player: SteamPlayer) => {
         avatarMap[player.steamid] = player.avatarfull;
       });
     }
@@ -141,15 +147,17 @@ export default async function EmbedLeaderboardPage({
               </TableRow>
             </TableHeader>
             <TableBody className="text-xl">
-              {leaderboardData?.map((entry, index) => (
-                <TableRow key={entry.discord_id} className="border-b border-border">
+              {leaderboardData?.map((entry: LeaderboardEntry, index: number) => (
+                <TableRow key={entry.users.steam_id64} className="border-b border-border">
                   <TableCell className="font-medium">#{index + 1}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <img
+                      <Image
                         src={avatarMap[entry.users.steam_id64] || '/default-avatar.png'}
                         alt={`${entry.users.user_nicknames[0].nickname}'s Steam Avatar`}
-                        className="w-8 h-8 rounded-full"
+                        width={32}
+                        height={32}
+                        className="rounded-full"
                       />
                       <span style={{ color: getNameColor(entry.elo) }}>
                         {entry.users.user_nicknames[0].nickname}

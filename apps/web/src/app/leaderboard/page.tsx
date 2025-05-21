@@ -1,18 +1,27 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import Image from 'next/image';
 
 // Create a single instance of the Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-  {
-    auth: {
-      persistSession: false
-    }
-  }
-);
+const supabase = createClient();
+
+interface LeaderboardEntry {
+  users: {
+    steam_id64: string;
+    user_nicknames: Array<{
+      nickname: string;
+    }>;
+  };
+  elo: number;
+  rank: number;
+}
+
+interface SteamPlayer {
+  steamid: string;
+  avatarfull: string;
+}
 
 // Function to fetch Steam avatars in batch
 async function getSteamAvatars(steamIds: string[]): Promise<Record<string, string>> {
@@ -23,9 +32,7 @@ async function getSteamAvatars(steamIds: string[]): Promise<Record<string, strin
   }
 
   try {
-    // Steam API endpoint for getting player summaries
     const url = `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${STEAM_API_KEY}&steamids=${steamIds.join(',')}`;
-    
     const response = await fetch(url);
     if (!response.ok) {
       console.error('Steam API error:', response.status, response.statusText);
@@ -33,15 +40,12 @@ async function getSteamAvatars(steamIds: string[]): Promise<Record<string, strin
     }
 
     const data = await response.json();
-    
-    // Create a map of steamId to avatar URL
     const avatarMap: Record<string, string> = {};
     if (data.response?.players) {
-      data.response.players.forEach((player: any) => {
+      data.response.players.forEach((player: SteamPlayer) => {
         avatarMap[player.steamid] = player.avatarfull;
       });
     }
-    
     return avatarMap;
   } catch (error) {
     console.error('Error fetching Steam avatars:', error);
@@ -119,8 +123,8 @@ export default async function LeaderboardPage({
     return <div>Error loading leaderboard data</div>;
   }
 
-  // Get Steam avatars for all players in the current page
-  const steamIds = leaderboardData?.map(entry => entry.users.steam_id64) || [];
+  // Get Steam avatars for all players
+  const steamIds = leaderboardData?.map((entry: LeaderboardEntry) => entry.users.steam_id64) || [];
   const avatarMap = await getSteamAvatars(steamIds);
 
   // Get total count for pagination
@@ -141,28 +145,30 @@ export default async function LeaderboardPage({
     <div className="container mx-auto py-8">
       <Card>
         <CardHeader>
-          <CardTitle>Leaderboard</CardTitle>
+          <CardTitle className="text-3xl">Leaderboard</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Rank</TableHead>
+                <TableHead className="w-[80px]">Rank</TableHead>
                 <TableHead>Player</TableHead>
                 <TableHead>ELO</TableHead>
                 <TableHead>Global Rank</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="text-xl">
-              {leaderboardData?.map((entry, index) => (
-                <TableRow key={entry.discord_id}>
-                  <TableCell>#{index + 1 + (page - 1) * itemsPerPage}</TableCell>
+              {leaderboardData?.map((entry: LeaderboardEntry, index: number) => (
+                <TableRow key={entry.users.steam_id64}>
+                  <TableCell className="font-medium">#{index + 1}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <img
+                      <Image
                         src={avatarMap[entry.users.steam_id64] || '/default-avatar.png'}
                         alt={`${entry.users.user_nicknames[0].nickname}'s Steam Avatar`}
-                        className="w-16 h-16 rounded-full"
+                        width={64}
+                        height={64}
+                        className="rounded-full"
                       />
                       <span style={{ color: getNameColor(entry.elo) }}>
                         {entry.users.user_nicknames[0].nickname}
