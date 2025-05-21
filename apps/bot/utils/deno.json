@@ -6,6 +6,7 @@
         "./supabase": "./supabase.ts"
     },
     "imports": {
-        "cheerio": "npm:cheerio@^1.0.0"
+        "cheerio": "npm:cheerio@^1.0.0",
+        "ofetch": "npm:ofetch@^1.4.1"
     }
 }

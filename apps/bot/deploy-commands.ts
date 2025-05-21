@@ -37,11 +37,20 @@ const rest = new REST().setToken(token);
 // and deploy your commands!
 (async () => {
   try {
-    console.log(
-      `Started refreshing ${commands.length} application (/) commands.`,
-    );
+    console.log('Starting command deployment process...');
 
-    await rest.put(Routes.applicationCommands(clientid), { body: [] }); // Clear all global commands
+    // First, delete all existing commands
+    console.log('Deleting existing commands...');
+    try {
+      await rest.put(Routes.applicationCommands(clientid), { body: [] });
+      console.log('Successfully deleted all existing commands');
+    } catch (err) {
+      console.error('Error deleting existing commands:', err);
+      return;
+    }
+
+    // Then add new commands
+    console.log(`Adding ${commands.length} new application (/) commands...`);
     let data;
     try {
       const DISCORD_CLIENT_ID = Deno.env.get('DISCORD_CLIENT_ID');
@@ -59,15 +68,15 @@ const rest = new REST().setToken(token);
         },
       );
     } catch (err) {
-      console.error('error adding commands:', err);
+      console.error('Error adding new commands:', err);
       return;
     }
 
     console.log(
       // @ts-ignore discord doesn't provie typing for this
-      `Successfully reloaded ${data.length} application (/) commands.`,
+      `Successfully added ${data.length} new application (/) commands.`,
     );
   } catch (error) {
-    console.error(error);
+    console.error('Unexpected error during command deployment:', error);
   }
 })();

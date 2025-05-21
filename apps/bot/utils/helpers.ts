@@ -1,4 +1,5 @@
 import { type Guild, type GuildMember, PermissionFlagsBits } from 'discord.js';
+import { ofetch } from 'ofetch';
 
 export function canBotModifyNickname(
   guild: Guild,
@@ -85,8 +86,6 @@ export function executeWithTimeout<T>(
   );
   return Promise.race([promise, timeout]);
 }
-
-import { ofetch } from 'ofetch';
 
 export async function getSteamid64(steamURL: string): Promise<string> {
   const STEAM_API_KEY = Deno.env.get('STEAM_API_KEY');  

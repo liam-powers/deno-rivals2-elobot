@@ -1,5 +1,5 @@
 import type { Client, Guild } from 'discord.js';
-import { canBotModifyNickname } from '@bot/utils/helpers';
+import { canBotModifyNickname, cleanNickname } from '@bot/utils/helpers';
 import type { User, UserStats } from '../../../packages/interfaces.ts';
 import { getUsers, getLatestUsersStats, updateNickname, addUserStatsEntries } from '@bot/utils/supabase';
 import { ofetch } from 'ofetch';
@@ -155,6 +155,15 @@ export async function updatePlayerData(client: Client<boolean>) {
         //     store it in their guildid_to_nickname dictionary in Dynamo for later.
         if (guild.id in user.guildid_to_nickname) {
           nickname = user.guildid_to_nickname[guild.id];
+          const cleanedNickname = cleanNickname(nickname);
+          if (cleanedNickname !== nickname) {
+            nickname = cleanedNickname;
+            await updateNickname(
+              user.discordid,
+              guild.id,
+              nickname,
+            );
+          }
         } else {
           nickname = member.nickname || member.displayName;
           if (!nickname) {
@@ -167,6 +176,7 @@ export async function updatePlayerData(client: Client<boolean>) {
             );
             return;
           }
+          nickname = cleanNickname(nickname);
           await updateNickname(
             user.discordid,
             guild.id,
