@@ -37,9 +37,10 @@ export async function updatePlayerData(client: Client<boolean>) {
 
   while (
     $('nextRequestURL')?.text()?.length > 0 &&
-    users.length > newUserStats.length &&
-    i < 500
+    i < 500 &&
+    newUserStats.length < users.length
   ) {
+    console.log(`Parsing leaderboard page ${i + 1} of 500...`);
     if (i > 0) {
       const nextLeaderboard = await ofetch($('nextRequestURL').text());
       $ = cheerio.load(nextLeaderboard, { xmlMode: true });
@@ -135,7 +136,7 @@ export async function updatePlayerData(client: Client<boolean>) {
   users.forEach((user) => {
     const stats = steamid64ToNewUserStats[user.steamid64];
     if (!stats) {
-      console.log("couldn't find stats for user with steamid: ", user);
+      // can't find stats for user w/ this steamid, must not have played ranked
       return;
     }
 
