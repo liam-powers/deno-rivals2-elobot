@@ -1,0 +1,17 @@
+{
+  "name": "deno-rivals2-elobot",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"cd apps/bot && deno task dev\" \"cd apps/web && pnpm dev\"",
+    "dev:bot": "cd apps/bot && deno task dev",
+    "dev:web": "cd apps/web && pnpm dev",
+    "build": "cd apps/web && pnpm build",
+    "start": "concurrently \"cd apps/bot && deno task start\" \"cd apps/web && pnpm start\"",
+    "start:bot": "cd apps/bot && deno task start",
+    "start:web": "cd apps/web && pnpm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 

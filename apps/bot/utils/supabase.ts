@@ -227,3 +227,36 @@ export async function deleteUser(discordid: string) {
     throw error;
   }
 }
+
+export async function updateLeaderboardSnapshot(
+  guildId: string,
+  userStats: UserStats[],
+  users: User[],
+) {
+  try {
+    const timestamp = new Date().toISOString();
+    
+    // Create a map of steamid64 to discordid for easy lookup
+    const steamToDiscord = new Map(
+      users.map(user => [user.steamid64, user.discordid])
+    );
+    
+    const { error } = await supabase
+      .from('leaderboard_snapshots')
+      .upsert(
+        userStats.map((stats) => ({
+          discord_id: steamToDiscord.get(stats.steamid64),
+          guild_id: guildId,
+          timestamp: timestamp,
+          elo: stats.elo,
+          rank: stats.rank,
+        })).filter(entry => entry.discord_id), // Filter out any entries where we couldn't find the discord_id
+      );
+
+    if (error) throw error;
+    return timestamp;
+  } catch (error) {
+    console.error('Error updating leaderboard snapshot:', error);
+    throw error;
+  }
+}
