@@ -1,17 +1,20 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // Create a single instance of the Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-  {
-    auth: {
-      persistSession: false
-    }
-  }
-);
+const supabase = createClient();
+
+interface LeaderboardEntry {
+  users: {
+    steam_id64: string;
+    user_nicknames: Array<{
+      nickname: string;
+    }>;
+  };
+  elo: number;
+  rank: number;
+}
 
 // Function to fetch Steam avatars in batch
 async function getSteamAvatars(steamIds: string[]): Promise<Record<string, string>> {
@@ -111,8 +114,15 @@ export default async function EmbedLeaderboardPage({
   }
 
   // Get Steam avatars for all players
-  const steamIds = leaderboardData?.map(entry => entry.users.steam_id64) || [];
+  const steamIds = leaderboardData?.map((entry: LeaderboardEntry) => entry.users.steam_id64) || [];
   const avatarMap = await getSteamAvatars(steamIds);
+
+  const leaderboardText = leaderboardData.map((entry: LeaderboardEntry, index: number) => {
+    const nickname = entry.users.user_nicknames[0].nickname;
+    const elo = entry.elo;
+    const rank = entry.rank;
+    return `${index + 1}. **${nickname}** - ${elo} ELO (#${rank})`;
+  }).join('\n');
 
   return (
     <div className="w-[800px] bg-background">
