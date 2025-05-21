@@ -3,7 +3,7 @@
   "tasks": {
     "dev": "deno run -A --env-file=./.env.development --watch --unstable-cron main.ts",
     "start": "deno run -A --env-file=./.env.production --unstable-cron main.ts",
-    "deploy": "deno run -A --env-file=./.env deploy-commands.ts"
+    "deploy": "deno run -A --env-file=./.env.production deploy-commands.ts"
   },
   "compilerOptions": {
     "lib": ["deno.window"],

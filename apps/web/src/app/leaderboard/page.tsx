@@ -72,7 +72,7 @@ function getNameColor(elo: number): string {
 export default async function LeaderboardPage({
   searchParams,
 }: {
-  searchParams: { guildId?: string; page?: string };
+  searchParams: Promise<{ guildId?: string; page?: string }>;
 }) {
   const params = await searchParams;
   const guildId = params.guildId;

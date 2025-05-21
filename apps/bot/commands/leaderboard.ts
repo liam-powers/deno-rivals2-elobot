@@ -1,15 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { getLatestUsersStats, getUsers, updateLeaderboardSnapshot } from '../utils/supabase.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
-
-const supabaseUrl = Deno.env.get('SUPABASE_URL');
-const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase credentials in environment variables');
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { getLatestUsersStats, getUsers, updateLeaderboardSnapshot, supabase } from '../utils/supabase.ts';
 
 export const data = new SlashCommandBuilder()
   .setName('leaderboard')

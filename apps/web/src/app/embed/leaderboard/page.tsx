@@ -68,12 +68,14 @@ function getNameColor(elo: number): string {
     : '#7f7866'; // stone
 }
 
-export default async function EmbedLeaderboardPage({
-  searchParams,
-}: {
-  searchParams: { guildId?: string };
-}) {
-  const guildId = searchParams.guildId;
+type Props = {
+  params: Promise<{ [key: string]: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function EmbedLeaderboardPage({ searchParams }: Props) {
+  const resolvedParams = await searchParams;
+  const guildId = resolvedParams.guildId;
 
   if (!guildId) {
     return <div>No guild ID provided</div>;
@@ -122,13 +124,6 @@ export default async function EmbedLeaderboardPage({
   // Get Steam avatars for all players
   const steamIds = leaderboardData?.map((entry: LeaderboardEntry) => entry.users.steam_id64) || [];
   const avatarMap = await getSteamAvatars(steamIds);
-
-  const leaderboardText = leaderboardData.map((entry: LeaderboardEntry, index: number) => {
-    const nickname = entry.users.user_nicknames[0].nickname;
-    const elo = entry.elo;
-    const rank = entry.rank;
-    return `${index + 1}. **${nickname}** - ${elo} ELO (#${rank})`;
-  }).join('\n');
 
   return (
     <div className="w-[800px] bg-background">
